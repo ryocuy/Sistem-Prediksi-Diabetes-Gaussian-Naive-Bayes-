@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 from sklearn.naive_bayes import GaussianNB
 import os
+import math
 
 # --- SETUP TAMPILAN WEB ---
 st.set_page_config(layout="wide", page_title="Diabetes prediction using supervised machine learning")
@@ -76,6 +77,129 @@ with col2:
 with col3:
     in_age = st.number_input("Umur (Age)", min_value=1.0, value=30.0, step=1.0)
 
+# ====================================================================
+# LOGIKA "EXCEL-STYLE": FULL PRECISION BACKEND, 2-DIGIT DISPLAY FRONTEND
+# ====================================================================
+# Konstanta manual (sesuai papan tulis dosen)
+PI = 3.14
+E  = 2.72
+
+def d(val, decimals=2):
+    """DISPLAY ONLY — format angka ke string dengan koma.
+    Jika round ke 2 digit hasilnya 0,00 padahal val > 0, 
+    tampilkan 3-4 digit agar tidak nol mutlak."""
+    if isinstance(val, (int, np.integer)):
+        return str(val)
+    # Cek apakah 2 digit menghasilkan "0.00" padahal val bukan nol
+    if abs(val) > 0 and abs(val) < 0.005:
+        for digits in range(3, 8):
+            test = f"{val:.{digits}f}"
+            if float(test) != 0.0:
+                test = test.rstrip('0')
+                if test.endswith('.'):
+                    test += '0'
+                return test.replace('.', ',')
+        return f"{val:.6f}".rstrip('0').replace('.', ',')
+    return f"{val:.{decimals}f}".replace('.', ',')
+
+def d_input(val):
+    """Format input value — integer jika bulat, 1 desimal jika pecahan."""
+    if val == int(val):
+        return f"{int(val)}"
+    return f"{val:.1f}".replace('.', ',')
+
+def d_sci(val):
+    """Format angka sangat kecil sebagai notasi ilmiah LaTeX yang rapi.
+    Contoh: 1,24 × 10^{-5}"""
+    if val == 0:
+        return "0"
+    if abs(val) >= 0.01:
+        return d(val)
+    # Ambil eksponen
+    exp = math.floor(math.log10(abs(val)))
+    mantissa = val / (10 ** exp)
+    return rf"{d(mantissa)} \times 10^{{{exp}}}"
+
+
+def calculate_and_render_step_by_step(x_val, mean_val, var_val, fitur_name, kelas, x_display):
+    """
+    Menghitung Gaussian PDF FULL PRECISION di backend (seperti Excel),
+    tapi MENAMPILKAN setiap langkah dengan format 2 desimal (seperti layar Excel).
+    
+    Menggunakan pi = 3.14 dan e = 2.72 agar akar rumusnya sama dengan papan tulis.
+    TIDAK ada round() pada variabel — semua presisi penuh.
+    
+    Returns: hasil akhir (presisi penuh, TIDAK dibulatkan)
+    """
+    
+    # ── BACKEND: Hitung presisi penuh (TIDAK ada round) ──
+    
+    # Langkah 1: 2 × pi × variance
+    akar_bawah = 2 * PI * var_val
+    
+    # Langkah 2: sqrt(akar_bawah)
+    hasil_akar = akar_bawah ** 0.5
+    
+    # Langkah 3: 1 / sqrt(...)
+    kiri = 1 / hasil_akar if hasil_akar != 0 else 0
+    
+    # Langkah 4: (x - mean)^2
+    selisih = x_val - mean_val
+    pangkat_atas = selisih ** 2
+    
+    # Langkah 5: 2 × variance
+    pangkat_bawah = 2 * var_val
+    
+    # Langkah 6: eksponen = -(pangkat_atas / pangkat_bawah)
+    if pangkat_bawah != 0:
+        eksponen_val = pangkat_atas / pangkat_bawah
+    else:
+        eksponen_val = 0
+    neg_eksponen = -eksponen_val
+    
+    # Langkah 7: e^(neg_eksponen) — pakai E = 2.72
+    kanan = E ** neg_eksponen
+    
+    # Langkah 8: hasil akhir = kiri × kanan (PRESISI PENUH)
+    hasil_akhir = kiri * kanan
+    
+    # ── FRONTEND: Render step-by-step dengan FORMAT 2 desimal ──
+    
+    st.latex(rf"\mu = {d(mean_val)}")
+    st.latex(rf"\sigma^2 = {d(var_val)}")
+    
+    st.latex(rf"P({fitur_name}={x_display}|H={kelas})")
+    
+    # Baris 1: Rumus lengkap dengan angka
+    st.latex(
+        rf"= \frac{{1}}{{\sqrt{{2 \times 3,14 \times {d(var_val)}}}}}"
+        rf" \times 2,72^{{-\frac{{({x_display}-{d(mean_val)})^2}}{{2 \times {d(var_val)}}}}}"
+    )
+    
+    # Baris 2: Hasil perkalian dalam akar & hasil pangkat
+    st.latex(
+        rf"= \frac{{1}}{{\sqrt{{{d(akar_bawah)}}}}}"
+        rf" \times 2,72^{{-\frac{{{d(pangkat_atas)}}}{{{d(pangkat_bawah)}}}}}"
+    )
+    
+    # Baris 3: Setelah akar & setelah bagi eksponen
+    st.latex(
+        rf"= \frac{{1}}{{{d(hasil_akar)}}}"
+        rf" \times 2,72^{{{d(neg_eksponen)}}}"
+    )
+    
+    # Baris 4: Kiri × Kanan (display only)
+    st.latex(rf"= {d(kiri)} \times {d(kanan)}")
+    
+    # Baris 5: Hasil akhir
+    nota = ""
+    if abs(hasil_akhir) < 0.005 and hasil_akhir != 0:
+        nota = r" \text{ *(Boleh lebih dari 2 digit karena 0,00...)*}"
+    st.latex(rf"= {d(hasil_akhir)}{nota}")
+    
+    return hasil_akhir  # RETURN PRESISI PENUH — bukan yang dibulatkan
+
+
 # --- TOMBOL EKSEKUSI ---
 if st.button("Analisa Probabilitas Gaussian", type="primary"):
     
@@ -126,131 +250,132 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
     with st.expander("📐 Buka Derivasi Matematis — Gaussian Naive Bayes"):
 
         # ====================================================
-        # HITUNG SEMUA NILAI YANG DIBUTUHKAN
+        # HITUNG PARAMETER DARI DATASET (PRESISI PENUH)
         # ====================================================
         jml_0      = len(df[df['Outcome'] == 0])
         jml_1      = len(df[df['Outcome'] == 1])
         total_data = len(df)
-        prior_0    = jml_0 / total_data
-        prior_1    = jml_1 / total_data
+        prior_0    = jml_0 / total_data   # presisi penuh
+        prior_1    = jml_1 / total_data   # presisi penuh
 
         mean_0 = df[df['Outcome'] == 0][fitur].mean()
         var_0  = df[df['Outcome'] == 0][fitur].var()
         mean_1 = df[df['Outcome'] == 1][fitur].mean()
         var_1  = df[df['Outcome'] == 1][fitur].var()
 
-        def gauss(x, m, v):
-            return (1 / np.sqrt(2 * np.pi * v)) * np.exp(-((x - m)**2) / (2 * v))
-
-        g0_gluc = gauss(in_glucose, mean_0['Glucose'], var_0['Glucose'])
-        g0_bmi  = gauss(in_bmi,     mean_0['BMI'],     var_0['BMI'])
-        g0_age  = gauss(in_age,     mean_0['Age'],     var_0['Age'])
-        g1_gluc = gauss(in_glucose, mean_1['Glucose'], var_1['Glucose'])
-        g1_bmi  = gauss(in_bmi,     mean_1['BMI'],     var_1['BMI'])
-        g1_age  = gauss(in_age,     mean_1['Age'],     var_1['Age'])
-
-        total_0 = prior_0 * g0_gluc * g0_bmi * g0_age
-        total_1 = prior_1 * g1_gluc * g1_bmi * g1_age
-
-        def fmt(val, decimals=2):
-            if val < 0.01 and val > 0:
-                s = f"{val:.6f}".rstrip('0')
-                if s.endswith('.'): s += '0'
-                return s.replace('.', ',')
-            return f"{val:.{decimals}f}".replace('.', ',')
-            
-        def fmt_long(val):
-            s = f"{val:.8f}".rstrip('0')
-            if s.endswith('.'): s += '0'
-            return s.replace('.', ',')
-
+        # ── INPUT PASIEN ──
         st.markdown("**INPUT PASIEN**")
-        st.write(f"Glucose = {in_glucose:.0f}")
-        st.write(f"BMI = {fmt(in_bmi, 1)}")
-        st.write(f"Age = {in_age:.0f}")
+        st.write(f"Glucose = {d_input(in_glucose)}")
+        st.write(f"BMI = {d_input(in_bmi)}")
+        st.write(f"Age = {d_input(in_age)}")
 
+        st.markdown("---")
+        st.markdown("**KONSTANTA YANG DIGUNAKAN (PERHITUNGAN MANUAL)**")
+        st.latex(r"\pi = 3,14 \quad;\quad e = 2,72")
+
+        st.markdown("---")
+
+        # ── PRIOR PROBABILITY ──
         st.markdown("**PRIOR PROBABILITY**")
-        st.latex(rf"P(H=0) = \frac{{{jml_0}}}{{{total_data}}} = {fmt(prior_0)}")
-        st.latex(rf"P(H=1) = \frac{{{jml_1}}}{{{total_data}}} = {fmt(prior_1)}")
+        st.latex(rf"P(H=0) = \frac{{{jml_0}}}{{{total_data}}} = {d(prior_0)}")
+        st.latex(rf"P(H=1) = \frac{{{jml_1}}}{{{total_data}}} = {d(prior_1)}")
 
         st.divider()
 
-        # ── KELAS H = 0 (SEHAT) ─────────────────────────────────
+        # ══════════════════════════════════════════════════════
+        # KELAS H = 0 (SEHAT)
+        # ══════════════════════════════════════════════════════
         st.markdown("### KELAS H = 0 (SEHAT)")
         
-        # Hitungan rinci Glucose H=0
-        akar_bawah0 = 2 * 3.14 * var_0['Glucose']
-        pangkat_atas0 = (in_glucose - mean_0['Glucose'])**2
-        pangkat_bawah0 = 2 * var_0['Glucose']
-        kiri_akhir0 = 1 / np.sqrt(akar_bawah0)
-        kanan_akhir0 = np.exp(-(pangkat_atas0 / pangkat_bawah0))
-
+        # --- Glucose H=0 ---
         st.markdown("**1) Glucose**")
-        st.latex(rf"\mu = {fmt(mean_0['Glucose'])}")
-        st.latex(rf"\sigma^2 = {fmt(var_0['Glucose'])}")
-        st.latex(rf"P(Glucose={in_glucose:.0f}|H=0)")
-        st.latex(rf"= \frac{{1}}{{\sqrt{{2 \times 3,14 \times {fmt(var_0['Glucose'])}}}}} \times 2,72^{{-\frac{{({in_glucose:.0f}-{fmt(mean_0['Glucose'])})^2}}{{2 \times {fmt(var_0['Glucose'])}}}}}")
-        st.latex(rf"= \frac{{1}}{{\sqrt{{{fmt(akar_bawah0)}}}}} \times 2,72^{{-\frac{{{fmt(pangkat_atas0)}}}{{{fmt(pangkat_bawah0)}}}}}")
-        st.latex(rf"= \frac{{1}}{{{fmt(np.sqrt(akar_bawah0))}}} \times 2,72^{{-{fmt(pangkat_atas0 / pangkat_bawah0)}}}")
-        st.latex(rf"= {fmt(kiri_akhir0)} \times {fmt(kanan_akhir0)}")
-        st.latex(rf"= {fmt(g0_gluc)} \text{{ *(Boleh lebih dari 2 digit karena 0,00...)*}}")
+        g0_gluc = calculate_and_render_step_by_step(
+            in_glucose, mean_0['Glucose'], var_0['Glucose'],
+            "Glucose", 0, d_input(in_glucose)
+        )
 
+        st.markdown("---")
+
+        # --- BMI H=0 ---
         st.markdown("**2) BMI**")
-        st.latex(rf"\mu = {fmt(mean_0['BMI'])}")
-        st.latex(rf"\sigma^2 = {fmt(var_0['BMI'])}")
-        st.latex(rf"P(BMI={fmt(in_bmi,1)}|H=0) = {fmt(g0_bmi)}")
+        g0_bmi = calculate_and_render_step_by_step(
+            in_bmi, mean_0['BMI'], var_0['BMI'],
+            "BMI", 0, d_input(in_bmi)
+        )
 
+        st.markdown("---")
+
+        # --- Age H=0 ---
         st.markdown("**3) Age**")
-        st.latex(rf"\mu = {fmt(mean_0['Age'])}")
-        st.latex(rf"\sigma^2 = {fmt(var_0['Age'])}")
-        st.latex(rf"P(Age={in_age:.0f}|H=0) = {fmt(g0_age)}")
+        g0_age = calculate_and_render_step_by_step(
+            in_age, mean_0['Age'], var_0['Age'],
+            "Age", 0, d_input(in_age)
+        )
+
+        st.markdown("---")
+
+        # ── GABUNG KELAS H=0 ──
+        # Backend: kalikan presisi penuh (seperti Excel kalikan sel)
+        total_0 = prior_0 * g0_gluc * g0_bmi * g0_age
 
         st.markdown("**Gabung Kelas H = 0**")
         st.latex(r"P(X|H=0) = P(H=0) \times P(Glucose) \times P(BMI) \times P(Age)")
-        st.latex(rf"P(X|H=0) = {fmt(prior_0)} \times {fmt(g0_gluc)} \times {fmt(g0_bmi)} \times {fmt(g0_age)}")
-        st.latex(rf"= {fmt_long(total_0)}")
+        st.latex(
+            rf"P(X|H=0) = {d(prior_0)} \times {d(g0_gluc)} \times {d(g0_bmi)} \times {d(g0_age)}"
+        )
+        st.latex(rf"= {d_sci(total_0)}")
 
         st.divider()
 
-        # ── KELAS H = 1 (SAKIT) ─────────────────────────────────
+        # ══════════════════════════════════════════════════════
+        # KELAS H = 1 (SAKIT)
+        # ══════════════════════════════════════════════════════
         st.markdown("### KELAS H = 1 (SAKIT)")
-        
-        # Hitungan rinci Glucose H=1
-        akar_bawah1 = 2 * 3.14 * var_1['Glucose']
-        pangkat_atas1 = (in_glucose - mean_1['Glucose'])**2
-        pangkat_bawah1 = 2 * var_1['Glucose']
-        kiri_akhir1 = 1 / np.sqrt(akar_bawah1)
-        kanan_akhir1 = np.exp(-(pangkat_atas1 / pangkat_bawah1))
 
+        # --- Glucose H=1 ---
         st.markdown("**1) Glucose**")
-        st.latex(rf"\mu = {fmt(mean_1['Glucose'])}")
-        st.latex(rf"\sigma^2 = {fmt(var_1['Glucose'])}")
-        st.latex(rf"P(Glucose={in_glucose:.0f}|H=1)")
-        st.latex(rf"= \frac{{1}}{{\sqrt{{2 \times 3,14 \times {fmt(var_1['Glucose'])}}}}} \times 2,72^{{-\frac{{({in_glucose:.0f}-{fmt(mean_1['Glucose'])})^2}}{{2 \times {fmt(var_1['Glucose'])}}}}}")
-        st.latex(rf"= \frac{{1}}{{\sqrt{{{fmt(akar_bawah1)}}}}} \times 2,72^{{-\frac{{{fmt(pangkat_atas1)}}}{{{fmt(pangkat_bawah1)}}}}}")
-        st.latex(rf"= \frac{{1}}{{{fmt(np.sqrt(akar_bawah1))}}} \times 2,72^{{-{fmt(pangkat_atas1 / pangkat_bawah1)}}}")
-        st.latex(rf"= {fmt(kiri_akhir1)} \times {fmt(kanan_akhir1)}")
-        st.latex(rf"= {fmt(g1_gluc)} \text{{ *(Boleh lebih dari 2 digit karena 0,00...)*}}")
+        g1_gluc = calculate_and_render_step_by_step(
+            in_glucose, mean_1['Glucose'], var_1['Glucose'],
+            "Glucose", 1, d_input(in_glucose)
+        )
 
+        st.markdown("---")
+
+        # --- BMI H=1 ---
         st.markdown("**2) BMI**")
-        st.latex(rf"\mu = {fmt(mean_1['BMI'])}")
-        st.latex(rf"\sigma^2 = {fmt(var_1['BMI'])}")
-        st.latex(rf"P(BMI={fmt(in_bmi,1)}|H=1) = {fmt(g1_bmi)}")
+        g1_bmi = calculate_and_render_step_by_step(
+            in_bmi, mean_1['BMI'], var_1['BMI'],
+            "BMI", 1, d_input(in_bmi)
+        )
 
+        st.markdown("---")
+
+        # --- Age H=1 ---
         st.markdown("**3) Age**")
-        st.latex(rf"\mu = {fmt(mean_1['Age'])}")
-        st.latex(rf"\sigma^2 = {fmt(var_1['Age'])}")
-        st.latex(rf"P(Age={in_age:.0f}|H=1) = {fmt(g1_age)}")
+        g1_age = calculate_and_render_step_by_step(
+            in_age, mean_1['Age'], var_1['Age'],
+            "Age", 1, d_input(in_age)
+        )
+
+        st.markdown("---")
+
+        # ── GABUNG KELAS H=1 ──
+        # Backend: kalikan presisi penuh (seperti Excel kalikan sel)
+        total_1 = prior_1 * g1_gluc * g1_bmi * g1_age
 
         st.markdown("**Gabung Kelas H = 1**")
         st.latex(r"P(X|H=1) = P(H=1) \times P(Glucose) \times P(BMI) \times P(Age)")
-        st.latex(rf"P(X|H=1) = {fmt(prior_1)} \times {fmt(g1_gluc)} \times {fmt(g1_bmi)} \times {fmt(g1_age)}")
-        st.latex(rf"= {fmt_long(total_1)}")
+        st.latex(
+            rf"P(X|H=1) = {d(prior_1)} \times {d(g1_gluc)} \times {d(g1_bmi)} \times {d(g1_age)}"
+        )
+        st.latex(rf"= {d_sci(total_1)}")
 
         st.divider()
 
-        # ── KEPUTUSAN ──────────────────────────────────────────
+        # ── PERBANDINGAN & KEPUTUSAN ──
         st.markdown("### PERBANDINGAN & KEPUTUSAN")
+        st.latex(rf"P(X|H=0) = {d_sci(total_0)}")
+        st.latex(rf"P(X|H=1) = {d_sci(total_1)}")
         st.markdown("**KEPUTUSAN:**")
         
         if total_0 > total_1:
