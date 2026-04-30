@@ -165,8 +165,8 @@ def calculate_and_render_step_by_step(x_val, mean_val, var_val, fitur_name, kela
     
     # ── FRONTEND: Render step-by-step dengan FORMAT 2 desimal ──
     
-    st.latex(rf"\mu = {d(mean_val)}")
-    st.latex(rf"\sigma^2 = {d(var_val)}")
+    st.latex(rf"mean = {d(mean_val)}")
+    st.latex(rf"var = {d(var_val)}")
     
     st.latex(rf"P({fitur_name}={x_display}|H={kelas})")
     
