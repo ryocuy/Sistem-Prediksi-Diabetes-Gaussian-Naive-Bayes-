@@ -245,6 +245,18 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
     st.pyplot(fig)
 
+    # --- TOMBOL DOWNLOAD GRAFIK ---
+    import io
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=200, bbox_inches="tight")
+    buf.seek(0)
+    st.download_button(
+        label="📥 Download Grafik Distribusi Gaussian",
+        data=buf,
+        file_name="grafik_gaussian_naive_bayes.png",
+        mime="image/png",
+    )
+
     # --- CHEAT SHEET PAPAN TULIS (LATEX MATH STYLE) ---
     st.divider()
     with st.expander("📐 Buka Derivasi Matematis — Gaussian Naive Bayes"):
