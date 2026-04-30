@@ -6,7 +6,6 @@ from scipy.stats import norm
 from sklearn.naive_bayes import GaussianNB
 import os
 import math
-import io
 
 # --- SETUP TAMPILAN WEB ---
 st.set_page_config(layout="wide", page_title="Diabetes prediction using supervised machine learning")
@@ -122,7 +121,7 @@ def d_sci(val):
     return rf"{d(mantissa)} \times 10^{{{exp}}}"
 
 
-def calculate_and_render_step_by_step(x_val, mean_val, var_val, fitur_name, kelas, x_display, lines):
+def calculate_and_render_step_by_step(x_val, mean_val, var_val, fitur_name, kelas, x_display):
     """
     Menghitung Gaussian PDF FULL PRECISION di backend (seperti Excel),
     tapi MENAMPILKAN setiap langkah dengan format 2 desimal (seperti layar Excel).
@@ -166,96 +165,39 @@ def calculate_and_render_step_by_step(x_val, mean_val, var_val, fitur_name, kela
     
     # ── FRONTEND: Render step-by-step dengan FORMAT 2 desimal ──
     
-    latex_mean = rf"mean = {d(mean_val)}"
-    latex_var = rf"var = {d(var_val)}"
-    st.latex(latex_mean)
-    st.latex(latex_var)
-    lines.append(('latex', latex_mean))
-    lines.append(('latex', latex_var))
+    st.latex(rf"mean = {d(mean_val)}")
+    st.latex(rf"var = {d(var_val)}")
     
-    l1 = rf"P({fitur_name}={x_display}|H={kelas})"
-    st.latex(l1)
-    lines.append(('latex', l1))
+    st.latex(rf"P({fitur_name}={x_display}|H={kelas})")
     
     # Baris 1: Rumus lengkap dengan angka
-    l2 = (
+    st.latex(
         rf"= \frac{{1}}{{\sqrt{{2 \times 3,14 \times {d(var_val)}}}}}"
         rf" \times 2,72^{{-\frac{{({x_display}-{d(mean_val)})^2}}{{2 \times {d(var_val)}}}}}"
     )
-    st.latex(l2)
-    lines.append(('latex', l2))
     
     # Baris 2: Hasil perkalian dalam akar & hasil pangkat
-    l3 = (
+    st.latex(
         rf"= \frac{{1}}{{\sqrt{{{d(akar_bawah)}}}}}"
         rf" \times 2,72^{{-\frac{{{d(pangkat_atas)}}}{{{d(pangkat_bawah)}}}}}"
     )
-    st.latex(l3)
-    lines.append(('latex', l3))
     
     # Baris 3: Setelah akar & setelah bagi eksponen
-    l4 = (
+    st.latex(
         rf"= \frac{{1}}{{{d(hasil_akar)}}}"
         rf" \times 2,72^{{{d(neg_eksponen)}}}"
     )
-    st.latex(l4)
-    lines.append(('latex', l4))
     
     # Baris 4: Kiri × Kanan (display only)
-    l5 = rf"= {d(kiri)} \times {d(kanan)}"
-    st.latex(l5)
-    lines.append(('latex', l5))
+    st.latex(rf"= {d(kiri)} \times {d(kanan)}")
     
     # Baris 5: Hasil akhir
     nota = ""
     if abs(hasil_akhir) < 0.005 and hasil_akhir != 0:
         nota = r" \text{ *(Boleh lebih dari 2 digit karena 0,00...)*}"
-    l6 = rf"= {d(hasil_akhir)}{nota}"
-    st.latex(l6)
-    lines.append(('latex', l6))
+    st.latex(rf"= {d(hasil_akhir)}{nota}")
     
     return hasil_akhir  # RETURN PRESISI PENUH — bukan yang dibulatkan
-
-
-def build_derivation_image(lines):
-    """Render semua baris derivasi (teks & LaTeX) ke satu gambar matplotlib."""
-    # Hitung tinggi gambar berdasarkan jumlah baris
-    line_h = 0.45  # tinggi per baris dalam inci
-    total_lines = len(lines)
-    fig_h = max(8, total_lines * line_h + 2)
-    
-    fig_img, ax = plt.subplots(figsize=(14, fig_h))
-    ax.axis('off')
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
-    
-    y = 0.99
-    dy = 1.0 / (total_lines + 2)  # spacing per line
-    
-    for line_type, content in lines:
-        if line_type == 'header':
-            ax.text(0.02, y, content, fontsize=14, fontweight='bold',
-                    verticalalignment='top', transform=ax.transAxes,
-                    fontfamily='sans-serif')
-            y -= dy * 1.3
-        elif line_type == 'text':
-            ax.text(0.03, y, content, fontsize=11,
-                    verticalalignment='top', transform=ax.transAxes,
-                    fontfamily='sans-serif')
-            y -= dy
-        elif line_type == 'latex':
-            ax.text(0.05, y, f'${content}$', fontsize=13,
-                    verticalalignment='top', transform=ax.transAxes,
-                    fontfamily='sans-serif')
-            y -= dy * 1.1
-        elif line_type == 'divider':
-            y -= dy * 0.3
-            ax.axhline(y=y, xmin=0.02, xmax=0.98, color='gray',
-                       linewidth=0.5, transform=ax.transAxes)
-            y -= dy * 0.3
-    
-    fig_img.tight_layout()
-    return fig_img
 
 
 # --- TOMBOL EKSEKUSI ---
@@ -304,6 +246,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
     st.pyplot(fig)
 
     # --- TOMBOL DOWNLOAD GRAFIK ---
+    import io
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=200, bbox_inches="tight")
     buf.seek(0)
@@ -317,9 +260,6 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
     # --- CHEAT SHEET PAPAN TULIS (LATEX MATH STYLE) ---
     st.divider()
     with st.expander("📐 Buka Derivasi Matematis — Gaussian Naive Bayes"):
-
-        # Kumpulkan semua baris untuk gambar download
-        deriv_lines = []
 
         # ====================================================
         # HITUNG PARAMETER DARI DATASET (PRESISI PENUH)
@@ -337,194 +277,122 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
         # ── INPUT PASIEN ──
         st.markdown("**INPUT PASIEN**")
-        deriv_lines.append(('header', 'INPUT PASIEN'))
-        
-        t1 = f"Glucose = {d_input(in_glucose)}"
-        t2 = f"BMI = {d_input(in_bmi)}"
-        t3 = f"Age = {d_input(in_age)}"
-        st.write(t1); st.write(t2); st.write(t3)
-        deriv_lines.append(('text', t1))
-        deriv_lines.append(('text', t2))
-        deriv_lines.append(('text', t3))
+        st.write(f"Glucose = {d_input(in_glucose)}")
+        st.write(f"BMI = {d_input(in_bmi)}")
+        st.write(f"Age = {d_input(in_age)}")
 
         st.markdown("---")
-        deriv_lines.append(('divider', ''))
-        
         st.markdown("**KONSTANTA YANG DIGUNAKAN (PERHITUNGAN MANUAL)**")
-        deriv_lines.append(('header', 'KONSTANTA YANG DIGUNAKAN'))
-        
-        lk = r"\pi = 3,14 \quad;\quad e = 2,72"
-        st.latex(lk)
-        deriv_lines.append(('latex', lk))
+        st.latex(r"\pi = 3,14 \quad;\quad e = 2,72")
 
         st.markdown("---")
-        deriv_lines.append(('divider', ''))
 
         # ── PRIOR PROBABILITY ──
         st.markdown("**PRIOR PROBABILITY**")
-        deriv_lines.append(('header', 'PRIOR PROBABILITY'))
-        
-        lp0 = rf"P(H=0) = \frac{{{jml_0}}}{{{total_data}}} = {d(prior_0)}"
-        lp1 = rf"P(H=1) = \frac{{{jml_1}}}{{{total_data}}} = {d(prior_1)}"
-        st.latex(lp0); st.latex(lp1)
-        deriv_lines.append(('latex', lp0))
-        deriv_lines.append(('latex', lp1))
+        st.latex(rf"P(H=0) = \frac{{{jml_0}}}{{{total_data}}} = {d(prior_0)}")
+        st.latex(rf"P(H=1) = \frac{{{jml_1}}}{{{total_data}}} = {d(prior_1)}")
 
         st.divider()
-        deriv_lines.append(('divider', ''))
 
         # ══════════════════════════════════════════════════════
         # KELAS H = 0 (SEHAT)
         # ══════════════════════════════════════════════════════
         st.markdown("### KELAS H = 0 (SEHAT)")
-        deriv_lines.append(('header', 'KELAS H = 0 (SEHAT)'))
         
         # --- Glucose H=0 ---
         st.markdown("**1) Glucose**")
-        deriv_lines.append(('header', '1) Glucose'))
         g0_gluc = calculate_and_render_step_by_step(
             in_glucose, mean_0['Glucose'], var_0['Glucose'],
-            "Glucose", 0, d_input(in_glucose), deriv_lines
+            "Glucose", 0, d_input(in_glucose)
         )
 
         st.markdown("---")
-        deriv_lines.append(('divider', ''))
 
         # --- BMI H=0 ---
         st.markdown("**2) BMI**")
-        deriv_lines.append(('header', '2) BMI'))
         g0_bmi = calculate_and_render_step_by_step(
             in_bmi, mean_0['BMI'], var_0['BMI'],
-            "BMI", 0, d_input(in_bmi), deriv_lines
+            "BMI", 0, d_input(in_bmi)
         )
 
         st.markdown("---")
-        deriv_lines.append(('divider', ''))
 
         # --- Age H=0 ---
         st.markdown("**3) Age**")
-        deriv_lines.append(('header', '3) Age'))
         g0_age = calculate_and_render_step_by_step(
             in_age, mean_0['Age'], var_0['Age'],
-            "Age", 0, d_input(in_age), deriv_lines
+            "Age", 0, d_input(in_age)
         )
 
         st.markdown("---")
-        deriv_lines.append(('divider', ''))
 
         # ── GABUNG KELAS H=0 ──
         # Backend: kalikan presisi penuh (seperti Excel kalikan sel)
         total_0 = prior_0 * g0_gluc * g0_bmi * g0_age
 
         st.markdown("**Gabung Kelas H = 0**")
-        deriv_lines.append(('header', 'Gabung Kelas H = 0'))
-        
-        lg0a = r"P(X|H=0) = P(H=0) \times P(Glucose) \times P(BMI) \times P(Age)"
-        lg0b = rf"P(X|H=0) = {d(prior_0)} \times {d(g0_gluc)} \times {d(g0_bmi)} \times {d(g0_age)}"
-        lg0c = rf"= {d_sci(total_0)}"
-        st.latex(lg0a); st.latex(lg0b); st.latex(lg0c)
-        deriv_lines.append(('latex', lg0a))
-        deriv_lines.append(('latex', lg0b))
-        deriv_lines.append(('latex', lg0c))
+        st.latex(r"P(X|H=0) = P(H=0) \times P(Glucose) \times P(BMI) \times P(Age)")
+        st.latex(
+            rf"P(X|H=0) = {d(prior_0)} \times {d(g0_gluc)} \times {d(g0_bmi)} \times {d(g0_age)}"
+        )
+        st.latex(rf"= {d_sci(total_0)}")
 
         st.divider()
-        deriv_lines.append(('divider', ''))
 
         # ══════════════════════════════════════════════════════
         # KELAS H = 1 (SAKIT)
         # ══════════════════════════════════════════════════════
         st.markdown("### KELAS H = 1 (SAKIT)")
-        deriv_lines.append(('header', 'KELAS H = 1 (SAKIT)'))
 
         # --- Glucose H=1 ---
         st.markdown("**1) Glucose**")
-        deriv_lines.append(('header', '1) Glucose'))
         g1_gluc = calculate_and_render_step_by_step(
             in_glucose, mean_1['Glucose'], var_1['Glucose'],
-            "Glucose", 1, d_input(in_glucose), deriv_lines
+            "Glucose", 1, d_input(in_glucose)
         )
 
         st.markdown("---")
-        deriv_lines.append(('divider', ''))
 
         # --- BMI H=1 ---
         st.markdown("**2) BMI**")
-        deriv_lines.append(('header', '2) BMI'))
         g1_bmi = calculate_and_render_step_by_step(
             in_bmi, mean_1['BMI'], var_1['BMI'],
-            "BMI", 1, d_input(in_bmi), deriv_lines
+            "BMI", 1, d_input(in_bmi)
         )
 
         st.markdown("---")
-        deriv_lines.append(('divider', ''))
 
         # --- Age H=1 ---
         st.markdown("**3) Age**")
-        deriv_lines.append(('header', '3) Age'))
         g1_age = calculate_and_render_step_by_step(
             in_age, mean_1['Age'], var_1['Age'],
-            "Age", 1, d_input(in_age), deriv_lines
+            "Age", 1, d_input(in_age)
         )
 
         st.markdown("---")
-        deriv_lines.append(('divider', ''))
 
         # ── GABUNG KELAS H=1 ──
         # Backend: kalikan presisi penuh (seperti Excel kalikan sel)
         total_1 = prior_1 * g1_gluc * g1_bmi * g1_age
 
         st.markdown("**Gabung Kelas H = 1**")
-        deriv_lines.append(('header', 'Gabung Kelas H = 1'))
-        
-        lg1a = r"P(X|H=1) = P(H=1) \times P(Glucose) \times P(BMI) \times P(Age)"
-        lg1b = rf"P(X|H=1) = {d(prior_1)} \times {d(g1_gluc)} \times {d(g1_bmi)} \times {d(g1_age)}"
-        lg1c = rf"= {d_sci(total_1)}"
-        st.latex(lg1a); st.latex(lg1b); st.latex(lg1c)
-        deriv_lines.append(('latex', lg1a))
-        deriv_lines.append(('latex', lg1b))
-        deriv_lines.append(('latex', lg1c))
+        st.latex(r"P(X|H=1) = P(H=1) \times P(Glucose) \times P(BMI) \times P(Age)")
+        st.latex(
+            rf"P(X|H=1) = {d(prior_1)} \times {d(g1_gluc)} \times {d(g1_bmi)} \times {d(g1_age)}"
+        )
+        st.latex(rf"= {d_sci(total_1)}")
 
         st.divider()
-        deriv_lines.append(('divider', ''))
 
         # ── PERBANDINGAN & KEPUTUSAN ──
         st.markdown("### PERBANDINGAN & KEPUTUSAN")
-        deriv_lines.append(('header', 'PERBANDINGAN & KEPUTUSAN'))
-        
-        ld0 = rf"P(X|H=0) = {d_sci(total_0)}"
-        ld1 = rf"P(X|H=1) = {d_sci(total_1)}"
-        st.latex(ld0); st.latex(ld1)
-        deriv_lines.append(('latex', ld0))
-        deriv_lines.append(('latex', ld1))
-        
+        st.latex(rf"P(X|H=0) = {d_sci(total_0)}")
+        st.latex(rf"P(X|H=1) = {d_sci(total_1)}")
         st.markdown("**KEPUTUSAN:**")
-        deriv_lines.append(('header', 'KEPUTUSAN:'))
         
         if total_0 > total_1:
-            lk1 = r"P(H=0) > P(H=1)"
-            lk2 = r"\Rightarrow \textbf{Masuk Kelas H = 0 (SEHAT)}"
-            st.latex(lk1); st.latex(lk2)
-            deriv_lines.append(('latex', lk1))
-            deriv_lines.append(('text', '=> Masuk Kelas H = 0 (SEHAT)'))
+            st.latex(r"P(H=0) > P(H=1)")
+            st.latex(r"\Rightarrow \textbf{Masuk Kelas H = 0 (SEHAT)}")
         else:
-            lk1 = r"P(H=1) > P(H=0)"
-            lk2 = r"\Rightarrow \textbf{Masuk Kelas H = 1 (SAKIT)}"
-            st.latex(lk1); st.latex(lk2)
-            deriv_lines.append(('latex', lk1))
-            deriv_lines.append(('text', '=> Masuk Kelas H = 1 (SAKIT)'))
-
-        # ── TOMBOL DOWNLOAD DERIVASI ──
-        st.markdown("---")
-        fig_deriv = build_derivation_image(deriv_lines)
-        buf_deriv = io.BytesIO()
-        fig_deriv.savefig(buf_deriv, format="png", dpi=150, bbox_inches="tight",
-                          facecolor='white', edgecolor='none')
-        buf_deriv.seek(0)
-        plt.close(fig_deriv)
-        
-        st.download_button(
-            label="📥 Download Gambar Derivasi Matematis (PNG)",
-            data=buf_deriv,
-            file_name="derivasi_gaussian_naive_bayes.png",
-            mime="image/png",
-        )
+            st.latex(r"P(H=1) > P(H=0)")
+            st.latex(r"\Rightarrow \textbf{Masuk Kelas H = 1 (SAKIT)}")
