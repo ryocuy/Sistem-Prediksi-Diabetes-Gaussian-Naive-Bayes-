@@ -85,15 +85,20 @@ E  = 2.72
 
 def d(val, decimals=2):
     """DISPLAY ONLY — format angka ke string dengan koma.
-    Jika angka sangat kecil, tampilkan presisi tinggi agar cocok dengan Excel."""
+    Jika round ke 2 digit hasilnya 0,00 padahal val > 0, 
+    tampilkan 3-4 digit agar tidak nol mutlak."""
     if isinstance(val, (int, np.integer)):
         return str(val)
-    if abs(val) > 0 and abs(val) < 0.01:
-        # Tampilkan hingga 8 desimal untuk angka yang sangat kecil
-        formatted = f"{val:.8f}".rstrip('0')
-        if formatted.endswith('.'):
-            formatted += '0'
-        return formatted.replace('.', ',')
+    # Cek apakah 2 digit menghasilkan "0.00" padahal val bukan nol
+    if abs(val) > 0 and abs(val) < 0.005:
+        for digits in range(3, 8):
+            test = f"{val:.{digits}f}"
+            if float(test) != 0.0:
+                test = test.rstrip('0')
+                if test.endswith('.'):
+                    test += '0'
+                return test.replace('.', ',')
+        return f"{val:.6f}".rstrip('0').replace('.', ',')
     return f"{val:.{decimals}f}".replace('.', ',')
 
 def d_input(val):
