@@ -70,12 +70,6 @@ model.fit(X, y)
 st.subheader("📚 Dataset Training (200 Data: 100 Sehat, 100 Sakit)")
 st.dataframe(df, use_container_width=True)
 
-with st.expander("📊 Lihat Contoh Format Hitungan Excel"):
-    try:
-        st.image("contoh_excel.png", caption="Tampilan Hitungan Excel dengan presisi yang disesuaikan")
-    except Exception:
-        st.info("Gambar contoh excel belum tersedia.")
-
 st.divider()
 
 # --- AREA INPUT PASIEN ---
