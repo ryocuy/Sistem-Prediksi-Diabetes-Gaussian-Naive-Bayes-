@@ -7,13 +7,13 @@ from sklearn.naive_bayes import GaussianNB
 import os
 import math
 
-# --- SETUP TAMPILAN WEB ---
+
 st.set_page_config(layout="wide", page_title="Diabetes prediction using supervised machine learning")
 st.title("**Diabetes prediction using supervised machine learning**")
 st.info("**Kelompok 10:** Rio | Imam | Reza")
 st.write("Dianalisa menggunakan 3 Fitur Utama: **Glucose, BMI, dan Age Link Jurnal > https://www.sciencedirect.com/science/article/pii/S1877050922021858?__cf_chl_tk=6uQLqR6bQzDhcj_CexbWDRZzFcI1xGtvKuqqU3nnKQU-1777098497-1.0.1.1-P2PIN_SMC42EsxRwYA8sI5nlhRmMD_otOtqeYcL.Crw**")
 st.caption("Datashet > https://www.kaggle.com/datasets/uciml/pima-indians-diabetes-database")
-# --- PERBESAR TULISAN DI SELURUH HALAMAN ---
+
 st.markdown("""
 <style>
 /* Perbesar formula LaTeX */
@@ -39,9 +39,9 @@ st.markdown("""
 
 st.divider()
 
-# --- LOAD DATASET ---
+
 def load_data():
-    # Mengambil lokasi folder tempat script ini berada
+
     base_path = os.path.dirname(__file__)
     file_path = os.path.join(base_path, 'diabetes.csv')
     return pd.read_csv(file_path)
@@ -52,28 +52,27 @@ except FileNotFoundError:
     st.error("🚨 File 'diabetes.csv' tidak ditemukan! Pastikan file CSV sudah ditaruh di folder yang sama dengan kodingan ini.")
     st.stop()
 
-# --- PEMBERSIHAN DATA ---
-# Pastikan data diubah ke bentuk angka untuk menghindari error
+
 for col in ['Glucose', 'BMI', 'Age', 'Outcome']:
     df[col] = pd.to_numeric(df[col], errors='coerce')
 
 df = df[['Glucose', 'BMI', 'Age', 'Outcome']].dropna()
 
-# Pisahkan variabel Input (X) dan Target (y)
+
 X = df[['Glucose', 'BMI', 'Age']]
 y = df['Outcome']
 
-# --- TRAINING MODEL AI ---
+
 model = GaussianNB()
 model.fit(X, y)
 
-# --- TAMPILKAN DATASET ---
+
 st.subheader("📚 Dataset Training (200 Data: 100 Sehat, 100 Sakit)")
 st.dataframe(df, use_container_width=True)
 
 st.divider()
 
-# --- AREA INPUT PASIEN ---
+
 st.subheader("Masukkan Data Uji Pasien:")
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -83,10 +82,7 @@ with col2:
 with col3:
     in_age = st.number_input("Umur (Age)", min_value=1.0, value=30.0, step=1.0)
 
-# ====================================================================
-# LOGIKA "EXCEL-STYLE": FULL PRECISION BACKEND, 2-DIGIT DISPLAY FRONTEND
-# ====================================================================
-# Konstanta manual (sesuai papan tulis dosen)
+
 PI = 3.14
 E  = 2.72
 
@@ -96,7 +92,7 @@ def d(val, decimals=2):
     tampilkan 3-4 digit agar tidak nol mutlak."""
     if isinstance(val, (int, np.integer)):
         return str(val)
-    # Cek apakah 2 digit menghasilkan "0.00" padahal val bukan nol
+
     if abs(val) > 0 and abs(val) < 0.005:
         for digits in range(3, 8):
             test = f"{val:.{digits}f}"
@@ -121,7 +117,7 @@ def d_sci(val):
         return "0"
     if abs(val) >= 0.01:
         return d(val)
-    # Ambil eksponen
+
     exp = math.floor(math.log10(abs(val)))
     mantissa = val / (10 ** exp)
     return rf"{d(mantissa)} \times 10^{{{exp}}}"
@@ -138,92 +134,89 @@ def calculate_and_render_step_by_step(x_val, mean_val, var_val, fitur_name, kela
     Returns: hasil akhir (presisi penuh, TIDAK dibulatkan)
     """
     
-    # ── BACKEND: Hitung presisi penuh (TIDAK ada round) ──
-    
-    # Langkah 1: 2 × pi × variance
+
     akar_bawah = 2 * PI * var_val
     
-    # Langkah 2: sqrt(akar_bawah)
+
     hasil_akar = akar_bawah ** 0.5
     
-    # Langkah 3: 1 / sqrt(...)
+
     kiri = 1 / hasil_akar if hasil_akar != 0 else 0
     
-    # Langkah 4: (x - mean)^2
+
     selisih = x_val - mean_val
     pangkat_atas = selisih ** 2
     
-    # Langkah 5: 2 × variance
+
     pangkat_bawah = 2 * var_val
     
-    # Langkah 6: eksponen = -(pangkat_atas / pangkat_bawah)
+
     if pangkat_bawah != 0:
         eksponen_val = pangkat_atas / pangkat_bawah
     else:
         eksponen_val = 0
     neg_eksponen = -eksponen_val
-    
-    # Langkah 7: e^(neg_eksponen) — pakai E = 2.72
+
     kanan = E ** neg_eksponen
     
-    # Langkah 8: hasil akhir = kiri × kanan (PRESISI PENUH)
+ 
     hasil_akhir = kiri * kanan
     
-    # ── FRONTEND: Render step-by-step dengan FORMAT 2 desimal ──
+
     
     st.latex(rf"mean = {d(mean_val)}")
     st.latex(rf"var = {d(var_val)}")
     
     st.latex(rf"P({fitur_name}={x_display}|H={kelas})")
     
-    # Baris 1: Rumus lengkap dengan angka
+  
     st.latex(
         rf"= \frac{{1}}{{\sqrt{{2 \times 3,14 \times {d(var_val)}}}}}"
         rf" \times 2,72^{{-\frac{{({x_display}-{d(mean_val)})^2}}{{2 \times {d(var_val)}}}}}"
     )
     
-    # Baris 2: Hasil perkalian dalam akar & hasil pangkat
+
     st.latex(
         rf"= \frac{{1}}{{\sqrt{{{d(akar_bawah)}}}}}"
         rf" \times 2,72^{{-\frac{{{d(pangkat_atas)}}}{{{d(pangkat_bawah)}}}}}"
     )
     
-    # Baris 3: Eksponen dibagi, akar masih utuh
+
     st.latex(
         rf"= \frac{{1}}{{\sqrt{{{d(akar_bawah)}}}}}"
         rf" \times 2,72^{{{d(neg_eksponen)}}}"
     )
 
-    # Baris 4: Eksponen jadi desimal, akar masih utuh
+
     st.latex(
         rf"= \frac{{1}}{{\sqrt{{{d(akar_bawah)}}}}}"
         rf" \times {d(kanan)}"
     )
     
-    # Baris 5: Akar dilepas
+
     st.latex(
         rf"= \frac{{1}}{{{d(hasil_akar)}}}"
         rf" \times {d(kanan)}"
     )
 
-    # Baris 6: Kiri × Kanan (display only) -> Hasil akhir
+
     nota = ""
     if abs(hasil_akhir) < 0.005 and hasil_akhir != 0:
         nota = r" \text{ *(Boleh lebih dari 2 digit karena 0,00...)*}"
     st.latex(rf"= {d(kiri)} \times {d(kanan)} = {d(hasil_akhir)}{nota}")
     
-    return hasil_akhir  # RETURN PRESISI PENUH — bukan yang dibulatkan
+    return hasil_akhir  
 
 
-# --- TOMBOL EKSEKUSI ---
+
 if st.button("Analisa Probabilitas Gaussian", type="primary"):
     
-    # Proses data input ke model AI
+   
     input_data = [[in_glucose, in_bmi, in_age]]
     prediksi = model.predict(input_data)[0]
     probabilitas = model.predict_proba(input_data)[0]
 
-    # --- TAMPILKAN HASIL KEPUTUSAN ---
+
     st.divider()
     st.subheader("Hasil Analisis:")
     if prediksi == 1:
@@ -231,7 +224,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
     else:
         st.success(f"✅ **0 (NEGATIF / SEHAT)** - Mesin yakin sebesar **{probabilitas[0]*100:.2f}%**")
 
-    # --- VISUALISASI KURVA LONCENG ---
+
     st.divider()
     st.subheader("📊 Visualisasi Distribusi Gaussian")
     st.write("Garis hitam putus-putus adalah posisi data pasien. Kurva yang posisinya lebih tinggi pada titik tersebut menunjukkan nilai *Likelihood* (Peluang) yang lebih besar.")
@@ -249,7 +242,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
         x = np.linspace(df[col].min() - 10, df[col].max() + 10, 100)
 
-        # Gambar Lonceng Sehat (Biru) dan Sakit (Merah)
+
         axs[i].plot(x, norm.pdf(x, mu_0, std_0), color='#1f77b4', linewidth=2, label='0 (Sehat)')
         axs[i].plot(x, norm.pdf(x, mu_1, std_1), color='#d62728', linewidth=2, label='1 (Sakit)')
         axs[i].axvline(inputs[i], color='black', linestyle='--', linewidth=2, label='Input Pasien')
@@ -260,7 +253,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
     st.pyplot(fig)
 
-    # --- TOMBOL DOWNLOAD GRAFIK ---
+
     import io
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=200, bbox_inches="tight")
@@ -272,25 +265,23 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         mime="image/png",
     )
 
-    # --- CHEAT SHEET PAPAN TULIS (LATEX MATH STYLE) ---
+
     st.divider()
     with st.expander("📐 Buka Derivasi Matematis — Gaussian Naive Bayes"):
 
-        # ====================================================
-        # HITUNG PARAMETER DARI DATASET (PRESISI PENUH)
-        # ====================================================
+
         jml_0      = len(df[df['Outcome'] == 0])
         jml_1      = len(df[df['Outcome'] == 1])
         total_data = len(df)
-        prior_0    = jml_0 / total_data   # presisi penuh
-        prior_1    = jml_1 / total_data   # presisi penuh
+        prior_0    = jml_0 / total_data  
+        prior_1    = jml_1 / total_data  
 
         mean_0 = df[df['Outcome'] == 0][fitur].mean()
         var_0  = df[df['Outcome'] == 0][fitur].var()
         mean_1 = df[df['Outcome'] == 1][fitur].mean()
         var_1  = df[df['Outcome'] == 1][fitur].var()
 
-        # ── INPUT PASIEN ──
+
         st.markdown("**INPUT PASIEN**")
         st.write(f"Glucose = {d_input(in_glucose)}")
         st.write(f"BMI = {d_input(in_bmi)}")
@@ -302,19 +293,17 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
         st.markdown("---")
 
-        # ── PRIOR PROBABILITY ──
+ 
         st.markdown("**PRIOR PROBABILITY**")
         st.latex(rf"P(H=0) = \frac{{{jml_0}}}{{{total_data}}} = {d(prior_0)}")
         st.latex(rf"P(H=1) = \frac{{{jml_1}}}{{{total_data}}} = {d(prior_1)}")
 
         st.divider()
 
-        # ══════════════════════════════════════════════════════
-        # KELAS H = 0 (SEHAT)
-        # ══════════════════════════════════════════════════════
+
         st.markdown("### KELAS H = 0 (SEHAT)")
         
-        # --- Glucose H=0 ---
+
         st.markdown("**1) Glucose**")
         g0_gluc = calculate_and_render_step_by_step(
             in_glucose, mean_0['Glucose'], var_0['Glucose'],
@@ -323,7 +312,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
         st.markdown("---")
 
-        # --- BMI H=0 ---
+
         st.markdown("**2) BMI**")
         g0_bmi = calculate_and_render_step_by_step(
             in_bmi, mean_0['BMI'], var_0['BMI'],
@@ -332,7 +321,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
         st.markdown("---")
 
-        # --- Age H=0 ---
+    
         st.markdown("**3) Age**")
         g0_age = calculate_and_render_step_by_step(
             in_age, mean_0['Age'], var_0['Age'],
@@ -341,8 +330,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
         st.markdown("---")
 
-        # ── GABUNG KELAS H=0 ──
-        # Backend: kalikan presisi penuh (seperti Excel kalikan sel)
+
         total_0 = prior_0 * g0_gluc * g0_bmi * g0_age
 
         st.markdown("**Gabung Kelas H = 0**")
@@ -354,12 +342,10 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
         st.divider()
 
-        # ══════════════════════════════════════════════════════
-        # KELAS H = 1 (SAKIT)
-        # ══════════════════════════════════════════════════════
+
         st.markdown("### KELAS H = 1 (SAKIT)")
 
-        # --- Glucose H=1 ---
+
         st.markdown("**1) Glucose**")
         g1_gluc = calculate_and_render_step_by_step(
             in_glucose, mean_1['Glucose'], var_1['Glucose'],
@@ -368,7 +354,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
         st.markdown("---")
 
-        # --- BMI H=1 ---
+
         st.markdown("**2) BMI**")
         g1_bmi = calculate_and_render_step_by_step(
             in_bmi, mean_1['BMI'], var_1['BMI'],
@@ -377,7 +363,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
         st.markdown("---")
 
-        # --- Age H=1 ---
+    
         st.markdown("**3) Age**")
         g1_age = calculate_and_render_step_by_step(
             in_age, mean_1['Age'], var_1['Age'],
@@ -386,8 +372,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
         st.markdown("---")
 
-        # ── GABUNG KELAS H=1 ──
-        # Backend: kalikan presisi penuh (seperti Excel kalikan sel)
+    
         total_1 = prior_1 * g1_gluc * g1_bmi * g1_age
 
         st.markdown("**Gabung Kelas H = 1**")
@@ -399,7 +384,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
         st.divider()
 
-        # ── PERBANDINGAN & KEPUTUSAN ──
+
         st.markdown("### PERBANDINGAN & KEPUTUSAN")
         st.latex(rf"P(X|H=0) = {d_sci(total_0)} = {f'{total_0:.8f}'.replace('.', ',')}")
         st.latex(rf"P(X|H=1) = {d_sci(total_1)} = {f'{total_1:.8f}'.replace('.', ',')}")
