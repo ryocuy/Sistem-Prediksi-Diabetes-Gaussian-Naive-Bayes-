@@ -70,6 +70,17 @@ model.fit(X, y)
 st.subheader("📚 Dataset Training (200 Data: 100 Sehat, 100 Sakit)")
 st.dataframe(df, use_container_width=True)
 
+try:
+    with open("Hitungan_UAS_Naive_Bayes.xlsx", "rb") as f:
+        st.download_button(
+            label="📥 Download Hitungan Manual Excel (Sesuai Format Dosen)",
+            data=f,
+            file_name="Hitungan_UAS_Naive_Bayes.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+except FileNotFoundError:
+    pass
+
 st.divider()
 
 # --- AREA INPUT PASIEN ---
