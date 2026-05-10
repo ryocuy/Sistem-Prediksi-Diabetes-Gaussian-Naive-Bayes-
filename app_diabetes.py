@@ -188,20 +188,29 @@ def calculate_and_render_step_by_step(x_val, mean_val, var_val, fitur_name, kela
         rf" \times 2,72^{{-\frac{{{d(pangkat_atas)}}}{{{d(pangkat_bawah)}}}}}"
     )
     
-    # Baris 3: Setelah akar & setelah bagi eksponen
+    # Baris 3: Eksponen dibagi, akar masih utuh
     st.latex(
-        rf"= \frac{{1}}{{{d(hasil_akar)}}}"
+        rf"= \frac{{1}}{{\sqrt{{{d(akar_bawah)}}}}}"
         rf" \times 2,72^{{{d(neg_eksponen)}}}"
     )
+
+    # Baris 4: Eksponen jadi desimal, akar masih utuh
+    st.latex(
+        rf"= \frac{{1}}{{\sqrt{{{d(akar_bawah)}}}}}"
+        rf" \times {d(kanan)}"
+    )
     
-    # Baris 4: Kiri × Kanan (display only)
-    st.latex(rf"= {d(kiri)} \times {d(kanan)}")
-    
-    # Baris 5: Hasil akhir
+    # Baris 5: Akar dilepas
+    st.latex(
+        rf"= \frac{{1}}{{{d(hasil_akar)}}}"
+        rf" \times {d(kanan)}"
+    )
+
+    # Baris 6: Kiri × Kanan (display only) -> Hasil akhir
     nota = ""
     if abs(hasil_akhir) < 0.005 and hasil_akhir != 0:
         nota = r" \text{ *(Boleh lebih dari 2 digit karena 0,00...)*}"
-    st.latex(rf"= {d(hasil_akhir)}{nota}")
+    st.latex(rf"= {d(kiri)} \times {d(kanan)} = {d(hasil_akhir)}{nota}")
     
     return hasil_akhir  # RETURN PRESISI PENUH — bukan yang dibulatkan
 
