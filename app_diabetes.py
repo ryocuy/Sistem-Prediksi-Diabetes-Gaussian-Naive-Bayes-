@@ -39,7 +39,6 @@ st.markdown("""
 st.divider()
 
 # --- LOAD DATASET ---
-@st.cache_data
 def load_data():
     # Mengambil lokasi folder tempat script ini berada
     base_path = os.path.dirname(__file__)
