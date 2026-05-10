@@ -67,8 +67,10 @@ model = GaussianNB()
 model.fit(X, y)
 
 # --- TAMPILKAN DATASET ---
-with st.expander("📚 Tampilkan Dataset Training (200 Data)"):
-    st.dataframe(df, use_container_width=True)
+st.subheader("📚 Dataset Training (200 Data: 100 Sehat, 100 Sakit)")
+st.dataframe(df, use_container_width=True)
+
+st.divider()
 
 # --- AREA INPUT PASIEN ---
 st.subheader("Masukkan Data Uji Pasien:")
