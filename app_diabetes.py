@@ -350,7 +350,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         st.latex(
             rf"P(X|H=0) = {d(prior_0)} \times {d(g0_gluc)} \times {d(g0_bmi)} \times {d(g0_age)}"
         )
-        st.latex(rf"= {d_sci(total_0)}")
+        st.latex(rf"= {d_sci(total_0)} = {f'{total_0:.8f}'.replace('.', ',')}")
 
         st.divider()
 
@@ -395,14 +395,14 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         st.latex(
             rf"P(X|H=1) = {d(prior_1)} \times {d(g1_gluc)} \times {d(g1_bmi)} \times {d(g1_age)}"
         )
-        st.latex(rf"= {d_sci(total_1)}")
+        st.latex(rf"= {d_sci(total_1)} = {f'{total_1:.8f}'.replace('.', ',')}")
 
         st.divider()
 
         # ── PERBANDINGAN & KEPUTUSAN ──
         st.markdown("### PERBANDINGAN & KEPUTUSAN")
-        st.latex(rf"P(X|H=0) = {d_sci(total_0)}")
-        st.latex(rf"P(X|H=1) = {d_sci(total_1)}")
+        st.latex(rf"P(X|H=0) = {d_sci(total_0)} = {f'{total_0:.8f}'.replace('.', ',')}")
+        st.latex(rf"P(X|H=1) = {d_sci(total_1)} = {f'{total_1:.8f}'.replace('.', ',')}")
         st.markdown("**KEPUTUSAN:**")
         
         if total_0 > total_1:
