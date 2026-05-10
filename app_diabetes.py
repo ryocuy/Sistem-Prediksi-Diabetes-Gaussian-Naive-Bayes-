@@ -10,6 +10,7 @@ import math
 # --- SETUP TAMPILAN WEB ---
 st.set_page_config(layout="wide", page_title="Diabetes prediction using supervised machine learning")
 st.title("**Diabetes prediction using supervised machine learning**")
+st.info("**Kelompok 10:** Rio | Imam | Reza")
 st.write("Dianalisa menggunakan 3 Fitur Utama: **Glucose, BMI, dan Age Link Jurnal > https://www.sciencedirect.com/science/article/pii/S1877050922021858?__cf_chl_tk=6uQLqR6bQzDhcj_CexbWDRZzFcI1xGtvKuqqU3nnKQU-1777098497-1.0.1.1-P2PIN_SMC42EsxRwYA8sI5nlhRmMD_otOtqeYcL.Crw**")
 st.caption("Datashet > https://www.kaggle.com/datasets/uciml/pima-indians-diabetes-database")
 # --- PERBESAR TULISAN DI SELURUH HALAMAN ---
