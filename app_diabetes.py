@@ -88,23 +88,24 @@ with col4:
 PI = 3.14
 E  = 2.72
 
-def d(val, decimals=2):
+def d(val, decimals=4):
     """DISPLAY ONLY — format angka ke string dengan koma.
-    Jika round ke 2 digit hasilnya 0,00 padahal val > 0, 
-    tampilkan 3-4 digit agar tidak nol mutlak."""
+    Menggunakan 4 digit desimal agar hitungan manual di kertas tidak melenceng jauh,
+    lalu membuang nol berlebih di belakang agar tetap rapi."""
     if isinstance(val, (int, np.integer)):
         return str(val)
 
-    if abs(val) > 0 and abs(val) < 0.005:
-        for digits in range(3, 8):
-            test = f"{val:.{digits}f}"
-            if float(test) != 0.0:
-                test = test.rstrip('0')
-                if test.endswith('.'):
-                    test += '0'
-                return test.replace('.', ',')
-        return f"{val:.6f}".rstrip('0').replace('.', ',')
-    return f"{val:.{decimals}f}".replace('.', ',')
+    # Format dengan batas desimal
+    s = f"{val:.{decimals}f}"
+    
+    # Hapus trailing zero dan titik/koma jika tidak diperlukan
+    if '.' in s:
+        s = s.rstrip('0').rstrip('.')
+        # Jika ternyata angkanya 0 (misal 0.0000), kembalikan "0"
+        if s == "":
+            s = "0"
+            
+    return s.replace('.', ',')
 
 def d_input(val):
     """Format input value — integer jika bulat, 1 desimal jika pecahan."""
