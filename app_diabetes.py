@@ -352,7 +352,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         st.latex(
             rf"P(X|Kelas=1) = {d(prior_1)} \times {d(g1_age)} \times {d(g1_bmi)} \times {d(g1_gluc)} \times {d(g1_insulin)}"
         )
-        st.latex(rf"= {d_sci(total_1)} = {f'{total_1:.8f}'.replace('.', ',')}")
+        st.latex(rf"= {d_sci(total_1)} = {f'{total_1:.11f}'.replace('.', ',')}")
 
         st.divider()
 
@@ -403,14 +403,14 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         st.latex(
             rf"P(X|Kelas=2) = {d(prior_2)} \times {d(g2_age)} \times {d(g2_bmi)} \times {d(g2_gluc)} \times {d(g2_insulin)}"
         )
-        st.latex(rf"= {d_sci(total_2)} = {f'{total_2:.8f}'.replace('.', ',')}")
+        st.latex(rf"= {d_sci(total_2)} = {f'{total_2:.11f}'.replace('.', ',')}")
 
         st.divider()
 
 
         st.markdown("### PERBANDINGAN & KEPUTUSAN")
-        st.latex(rf"P(X|Kelas=1) = {d_sci(total_1)} = {f'{total_1:.8f}'.replace('.', ',')}")
-        st.latex(rf"P(X|Kelas=2) = {d_sci(total_2)} = {f'{total_2:.8f}'.replace('.', ',')}")
+        st.latex(rf"P(X|Kelas=1) = {d_sci(total_1)} = {f'{total_1:.11f}'.replace('.', ',')}")
+        st.latex(rf"P(X|Kelas=2) = {d_sci(total_2)} = {f'{total_2:.11f}'.replace('.', ',')}")
         st.markdown("**KEPUTUSAN:**")
         
         if total_1 > total_2:
