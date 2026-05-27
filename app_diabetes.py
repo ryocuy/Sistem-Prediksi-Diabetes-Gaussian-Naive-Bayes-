@@ -236,9 +236,9 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
     st.divider()
     st.subheader("Hasil Analisis:")
     if prediksi == 2:
-        st.error(f"⚠️ **2 (SAKIT)** - Mesin yakin sebesar **{probabilitas[1]*100:.2f}%**")
+        st.error(f"⚠️ **2 (SAKIT)**")
     else:
-        st.success(f"✅ **1 (SEHAT)** - Mesin yakin sebesar **{probabilitas[0]*100:.2f}%**")
+        st.success(f"✅ **1 (SEHAT)**")
 
 
     st.divider()
