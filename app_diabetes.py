@@ -125,6 +125,12 @@ def d_sci(val):
     mantissa = val / (10 ** exp)
     return rf"{d(mantissa)} \times 10^{{{exp}}}"
 
+def d_auto(val):
+    """Format presisi desimal dinamis tanpa memotong angka nol belakang."""
+    s = f"{val:.25f}".rstrip('0')
+    if s.endswith('.'): s += '0'
+    return s.replace('.', ',')
+
 
 def calculate_and_render_step_by_step(x_val, mean_val, var_val, fitur_name, kelas, x_display):
     """
@@ -352,7 +358,7 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         st.latex(
             rf"P(X|Kelas=1) = {d(prior_1)} \times {d(g1_age)} \times {d(g1_bmi)} \times {d(g1_gluc)} \times {d(g1_insulin)}"
         )
-        st.latex(rf"= {d_sci(total_1)} = {f'{total_1:.11f}'.replace('.', ',')}")
+        st.latex(rf"= {d_sci(total_1)} = {d_auto(total_1)}")
 
         st.divider()
 
@@ -403,14 +409,14 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         st.latex(
             rf"P(X|Kelas=2) = {d(prior_2)} \times {d(g2_age)} \times {d(g2_bmi)} \times {d(g2_gluc)} \times {d(g2_insulin)}"
         )
-        st.latex(rf"= {d_sci(total_2)} = {f'{total_2:.11f}'.replace('.', ',')}")
+        st.latex(rf"= {d_sci(total_2)} = {d_auto(total_2)}")
 
         st.divider()
 
 
         st.markdown("### PERBANDINGAN & KEPUTUSAN")
-        st.latex(rf"P(X|Kelas=1) = {d_sci(total_1)} = {f'{total_1:.11f}'.replace('.', ',')}")
-        st.latex(rf"P(X|Kelas=2) = {d_sci(total_2)} = {f'{total_2:.11f}'.replace('.', ',')}")
+        st.latex(rf"P(X|Kelas=1) = {d_sci(total_1)} = {d_auto(total_1)}")
+        st.latex(rf"P(X|Kelas=2) = {d_sci(total_2)} = {d_auto(total_2)}")
         st.markdown("**KEPUTUSAN:**")
         
         if total_1 > total_2:
