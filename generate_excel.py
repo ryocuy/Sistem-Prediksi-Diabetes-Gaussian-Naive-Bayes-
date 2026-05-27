@@ -5,7 +5,7 @@ wb = openpyxl.Workbook()
 ws = wb.active
 ws.title = "Hitungan"
 
-# 1. Tulis Dataset ke Kolom A-I
+# 1. Tulis Dataset ke Kolom A-E
 with open("diabetes.csv", "r", encoding="utf-8") as f:
     reader = csv.reader(f)
     for row_idx, row in enumerate(reader, 1):
@@ -20,47 +20,51 @@ with open("diabetes.csv", "r", encoding="utf-8") as f:
             ws.cell(row=row_idx, column=col_idx, value=val)
 
 # 2. Setup Layout Hitungan di sebelah kanan
-ws['J1'] = "Naive Bayes Gaussian - Dataset Diabetes"
+ws['G1'] = "Naive Bayes Gaussian - Dataset Diabetes"
 
-ws['J3'] = "Kelas"
-ws['K3'] = "Jumlah"
-ws['L3'] = "P(H)"
-ws['J4'] = 1; ws['K4'] = 50; ws['L4'] = "=K4/100"
-ws['J5'] = 0; ws['K5'] = 50; ws['L5'] = "=K5/100"
+ws['G3'] = "Kelas"
+ws['H3'] = "Jumlah"
+ws['I3'] = "P(H)"
+ws['G4'] = 1; ws['H4'] = 50; ws['I4'] = "=H4/100"
+ws['G5'] = 2; ws['H5'] = 50; ws['I5'] = "=H5/100"
 
-ws['J7'] = "Kelas 1"
-ws['J8'] = "Rata-rata"; ws['K8'] = "Glucose"; ws['L8'] = "BMI"; ws['M8'] = "Age"
-ws['K9'] = "=AVERAGE(A2:A51)"; ws['L9'] = "=AVERAGE(B2:B51)"; ws['M9'] = "=AVERAGE(C2:C51)"
-ws['J10'] = "Varian"; ws['K10'] = "=VAR.S(A2:A51)"; ws['L10'] = "=VAR.S(B2:B51)"; ws['M10'] = "=VAR.S(C2:C51)"
+ws['G7'] = "Kelas 1"
+ws['G8'] = "Rata-rata"; ws['H8'] = "Age"; ws['I8'] = "BMI"; ws['J8'] = "Glucose"; ws['K8'] = "Insulin"
+ws['H9'] = "=AVERAGE(A2:A51)"; ws['I9'] = "=AVERAGE(B2:B51)"; ws['J9'] = "=AVERAGE(C2:C51)"; ws['K9'] = "=AVERAGE(D2:D51)"
+ws['G10'] = "Varian"; ws['H10'] = "=VAR.S(A2:A51)"; ws['I10'] = "=VAR.S(B2:B51)"; ws['J10'] = "=VAR.S(C2:C51)"; ws['K10'] = "=VAR.S(D2:D51)"
 
-ws['J12'] = "Kelas 0"
-ws['J13'] = "Rata-rata"; ws['K13'] = "=AVERAGE(A52:A101)"; ws['L13'] = "=AVERAGE(B52:B101)"; ws['M13'] = "=AVERAGE(C52:C101)"
-ws['J14'] = "Varian"; ws['K14'] = "=VAR.S(A52:A101)"; ws['L14'] = "=VAR.S(B52:B101)"; ws['M14'] = "=VAR.S(C52:C101)"
+ws['G12'] = "Kelas 2"
+ws['G13'] = "Rata-rata"; ws['H13'] = "=AVERAGE(A52:A101)"; ws['I13'] = "=AVERAGE(B52:B101)"; ws['J13'] = "=AVERAGE(C52:C101)"; ws['K13'] = "=AVERAGE(D52:D101)"
+ws['G14'] = "Varian"; ws['H14'] = "=VAR.S(A52:A101)"; ws['I14'] = "=VAR.S(B52:B101)"; ws['J14'] = "=VAR.S(C52:C101)"; ws['K14'] = "=VAR.S(D52:D101)"
 
-ws['K16'] = "Nilai"; ws['L16'] = "Kelas 1"; ws['M16'] = "Kelas 0"
+ws['H16'] = "Nilai"; ws['I16'] = "Kelas 1"; ws['J16'] = "Kelas 2"
 
 # FIXED: Use -1 * (x - mean)^2 to avoid Excel unary minus bug
-ws['J17'] = "Glucose"; ws['K17'] = 120
-ws['L17'] = "=1/SQRT(2*3.14*K10)*(2.72^(-1*((K17-K9)^2)/(2*K10)))"
-ws['M17'] = "=1/SQRT(2*3.14*K14)*(2.72^(-1*((K17-K13)^2)/(2*K14)))"
+ws['G17'] = "Age"; ws['H17'] = 30
+ws['I17'] = "=1/SQRT(2*3.14*H10)*(2.72^(-1*((H17-H9)^2)/(2*H10)))"
+ws['J17'] = "=1/SQRT(2*3.14*H14)*(2.72^(-1*((H17-H13)^2)/(2*H14)))"
 
-ws['J18'] = "BMI"; ws['K18'] = 25
-ws['L18'] = "=1/SQRT(2*3.14*L10)*(2.72^(-1*((K18-L9)^2)/(2*L10)))"
-ws['M18'] = "=1/SQRT(2*3.14*L14)*(2.72^(-1*((K18-L13)^2)/(2*L14)))"
+ws['G18'] = "BMI"; ws['H18'] = 25
+ws['I18'] = "=1/SQRT(2*3.14*I10)*(2.72^(-1*((H18-I9)^2)/(2*I10)))"
+ws['J18'] = "=1/SQRT(2*3.14*I14)*(2.72^(-1*((H18-I13)^2)/(2*I14)))"
 
-ws['J19'] = "Age"; ws['K19'] = 30
-ws['L19'] = "=1/SQRT(2*3.14*M10)*(2.72^(-1*((K19-M9)^2)/(2*M10)))"
-ws['M19'] = "=1/SQRT(2*3.14*M14)*(2.72^(-1*((K19-M13)^2)/(2*M14)))"
+ws['G19'] = "Glucose"; ws['H19'] = 120
+ws['I19'] = "=1/SQRT(2*3.14*J10)*(2.72^(-1*((H19-J9)^2)/(2*J10)))"
+ws['J19'] = "=1/SQRT(2*3.14*J14)*(2.72^(-1*((H19-J13)^2)/(2*J14)))"
 
-ws['J20'] = "output?"; ws['K20'] = 1
-ws['J21'] = "Akhir Kali"; ws['K21'] = "Kelas 1"; ws['L21'] = "Kelas 0"
-ws['K22'] = "=L4*L17*L18*L19"
-ws['L22'] = "=L5*M17*M18*M19"
+ws['G20'] = "Insulin"; ws['H20'] = 5.0
+ws['I20'] = "=1/SQRT(2*3.14*K10)*(2.72^(-1*((H20-K9)^2)/(2*K10)))"
+ws['J20'] = "=1/SQRT(2*3.14*K14)*(2.72^(-1*((H20-K13)^2)/(2*K14)))"
 
-ws['J23'] = "Hasil Prediksi"
-ws['K23'] = '=IF(K22>L22, "Kelas 1", "Kelas 0")'
-ws['J24'] = "cari nilai probabilitas tertinggi"
-ws['K24'] = '=IF(K22>L22, "Kelas 1 (Sakit)", "Kelas 0 (Negatif/Sehat)")'
+ws['G21'] = "output?"; ws['H21'] = 1
+ws['G22'] = "Akhir Kali"; ws['H22'] = "Kelas 1"; ws['I22'] = "Kelas 2"
+ws['H23'] = "=I4*I17*I18*I19*I20"
+ws['I23'] = "=I5*J17*J18*J19*J20"
+
+ws['G25'] = "Hasil Prediksi"
+ws['H25'] = '=IF(H23>I23, "Kelas 1", "Kelas 2")'
+ws['G26'] = "cari nilai probabilitas tertinggi"
+ws['H26'] = '=IF(H23>I23, "Kelas 1 (Sehat)", "Kelas 2 (Sakit)")'
 
 wb.save("Hitungan_UAS_Naive_Bayes.xlsx")
 print("File Hitungan_UAS_Naive_Bayes.xlsx diperbaiki!")

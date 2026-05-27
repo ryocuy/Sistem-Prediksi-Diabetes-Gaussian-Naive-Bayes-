@@ -54,21 +54,21 @@ except FileNotFoundError:
 
 # --- PEMBERSIHAN DATA ---
 # Pastikan data diubah ke bentuk angka untuk menghindari error
-for col in ['Glucose', 'BMI', 'Age', 'Outcome']:
+for col in ['Glucose', 'BMI', 'Age', 'Classification']:
     df[col] = pd.to_numeric(df[col], errors='coerce')
 
-df = df[['Glucose', 'BMI', 'Age', 'Outcome']].dropna()
+df = df[['Glucose', 'BMI', 'Age', 'Classification']].dropna()
 
 # Pisahkan variabel Input (X) dan Target (y)
 X = df[['Glucose', 'BMI', 'Age']]
-y = df['Outcome']
+y = df['Classification']
 
 # --- TRAINING MODEL AI ---
 model = GaussianNB()
 model.fit(X, y)
 
 # --- TAMPILKAN DATASET ---
-st.subheader("📚 Dataset Training (100 Data: 50 Sehat, 50 Sakit)")
+st.subheader("📚 Dataset Training (100 Data: 50 Kelas 1 (Sehat), 50 Kelas 2 (Sakit))")
 st.dataframe(df, use_container_width=True)
 
 st.divider()
@@ -219,39 +219,39 @@ def calculate_and_render_step_by_step(x_val, mean_val, var_val, fitur_name, kela
 if st.button("Analisa Probabilitas Gaussian", type="primary"):
     
     # Proses data input ke model AI
-    input_data = [[in_glucose, in_bmi, in_age]]
+    input_data = [[in_age, in_bmi, in_glucose, in_insulin]]
     prediksi = model.predict(input_data)[0]
     probabilitas = model.predict_proba(input_data)[0]
 
     # --- TAMPILKAN HASIL KEPUTUSAN ---
     st.divider()
     st.subheader("Hasil Analisis:")
-    if prediksi == 1:
-        st.error(f"⚠️ **1 (POSITIF DIABETES)** - Mesin yakin sebesar **{probabilitas[1]*100:.2f}%**")
+    if prediksi == 2:
+        st.error(f"⚠️ **2 (SAKIT)** - Mesin yakin sebesar **{probabilitas[1]*100:.2f}%**")
     else:
-        st.success(f"✅ **0 (NEGATIF / SEHAT)** - Mesin yakin sebesar **{probabilitas[0]*100:.2f}%**")
+        st.success(f"✅ **1 (SEHAT)** - Mesin yakin sebesar **{probabilitas[0]*100:.2f}%**")
 
     # --- VISUALISASI KURVA LONCENG ---
     st.divider()
     st.subheader("📊 Visualisasi Distribusi Gaussian")
     st.write("Garis hitam putus-putus adalah posisi data pasien. Kurva yang posisinya lebih tinggi pada titik tersebut menunjukkan nilai *Likelihood* (Peluang) yang lebih besar.")
 
-    fig, axs = plt.subplots(1, 3, figsize=(15, 4))
-    fitur = ['Glucose', 'BMI', 'Age']
-    inputs = [in_glucose, in_bmi, in_age]
+    fig, axs = plt.subplots(1, 4, figsize=(20, 4))
+    fitur = ['Age', 'BMI', 'Glucose', 'Insulin']
+    inputs = [in_age, in_bmi, in_glucose, in_insulin]
 
     for i, col in enumerate(fitur):
-        mu_0 = df[df['Outcome']==0][col].mean()
-        std_0 = df[df['Outcome']==0][col].std()
+        mu_0 = df[df['Classification']==2][col].mean()
+        std_0 = df[df['Classification']==2][col].std()
         
-        mu_1 = df[df['Outcome']==1][col].mean()
-        std_1 = df[df['Outcome']==1][col].std()
+        mu_1 = df[df['Classification']==2][col].mean()
+        std_1 = df[df['Classification']==2][col].std()
 
         x = np.linspace(df[col].min() - 10, df[col].max() + 10, 100)
 
         # Gambar Lonceng Sehat (Biru) dan Sakit (Merah)
-        axs[i].plot(x, norm.pdf(x, mu_0, std_0), color='#1f77b4', linewidth=2, label='0 (Sehat)')
-        axs[i].plot(x, norm.pdf(x, mu_1, std_1), color='#d62728', linewidth=2, label='1 (Sakit)')
+        axs[i].plot(x, norm.pdf(x, mu_0, std_0), color='#1f77b4', linewidth=2, label='Kelas 1 (Sehat)')
+        axs[i].plot(x, norm.pdf(x, mu_1, std_1), color='#d62728', linewidth=2, label='Kelas 2 (Sakit)')
         axs[i].axvline(inputs[i], color='black', linestyle='--', linewidth=2, label='Input Pasien')
 
         axs[i].set_title(f"Kurva {col}")
@@ -279,16 +279,16 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         # ====================================================
         # HITUNG PARAMETER DARI DATASET (PRESISI PENUH)
         # ====================================================
-        jml_0      = len(df[df['Outcome'] == 0])
-        jml_1      = len(df[df['Outcome'] == 1])
+        jml_2      = len(df[df['Classification'] == 2])
+        jml_2      = len(df[df['Classification'] == 2])
         total_data = len(df)
-        prior_0    = jml_0 / total_data   # presisi penuh
-        prior_1    = jml_1 / total_data   # presisi penuh
+        prior_2    = jml_2 / total_data   # presisi penuh
+        prior_2    = jml_2 / total_data   # presisi penuh
 
-        mean_0 = df[df['Outcome'] == 0][fitur].mean()
-        var_0  = df[df['Outcome'] == 0][fitur].var()
-        mean_1 = df[df['Outcome'] == 1][fitur].mean()
-        var_1  = df[df['Outcome'] == 1][fitur].var()
+        mean_2 = df[df['Classification'] == 2][fitur].mean()
+        var_2  = df[df['Classification'] == 2][fitur].var()
+        mean_2 = df[df['Classification'] == 2][fitur].mean()
+        var_2  = df[df['Classification'] == 2][fitur].var()
 
         # ── INPUT PASIEN ──
         st.markdown("**INPUT PASIEN**")
@@ -304,8 +304,8 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
         # ── PRIOR PROBABILITY ──
         st.markdown("**PRIOR PROBABILITY**")
-        st.latex(rf"P(H=0) = \frac{{{jml_0}}}{{{total_data}}} = {d(prior_0)}")
-        st.latex(rf"P(H=1) = \frac{{{jml_1}}}{{{total_data}}} = {d(prior_1)}")
+        st.latex(rf"P(Kelas=1) = \frac{{{jml_2}}}{{{total_data}}} = {d(prior_2)}")
+        st.latex(rf"P(Kelas=2) = \frac{{{jml_2}}}{{{total_data}}} = {d(prior_2)}")
 
         st.divider()
 
@@ -314,43 +314,43 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         # ══════════════════════════════════════════════════════
         st.markdown("### KELAS H = 0 (SEHAT)")
         
-        # --- Glucose H=0 ---
+        # --- Glucose Kelas=1 ---
         st.markdown("**1) Glucose**")
-        g0_gluc = calculate_and_render_step_by_step(
-            in_glucose, mean_0['Glucose'], var_0['Glucose'],
+        g2_gluc = calculate_and_render_step_by_step(
+            in_glucose, mean_2['Glucose'], var_2['Glucose'],
             "Glucose", 0, d_input(in_glucose)
         )
 
         st.markdown("---")
 
-        # --- BMI H=0 ---
+        # --- BMI Kelas=1 ---
         st.markdown("**2) BMI**")
-        g0_bmi = calculate_and_render_step_by_step(
-            in_bmi, mean_0['BMI'], var_0['BMI'],
+        g2_bmi = calculate_and_render_step_by_step(
+            in_bmi, mean_2['BMI'], var_2['BMI'],
             "BMI", 0, d_input(in_bmi)
         )
 
         st.markdown("---")
 
-        # --- Age H=0 ---
+        # --- Age Kelas=1 ---
         st.markdown("**3) Age**")
-        g0_age = calculate_and_render_step_by_step(
-            in_age, mean_0['Age'], var_0['Age'],
+        g2_age = calculate_and_render_step_by_step(
+            in_age, mean_2['Age'], var_2['Age'],
             "Age", 0, d_input(in_age)
         )
 
         st.markdown("---")
 
-        # ── GABUNG KELAS H=0 ──
+        # ── GABUNG KELAS Kelas=1 ──
         # Backend: kalikan presisi penuh (seperti Excel kalikan sel)
-        total_0 = prior_0 * g0_gluc * g0_bmi * g0_age
+        total_2 = prior_2 * g2_age * g2_bmi * g2_gluc * g2_insulin
 
         st.markdown("**Gabung Kelas H = 0**")
-        st.latex(r"P(X|H=0) = P(H=0) \times P(Glucose) \times P(BMI) \times P(Age)")
+        st.latex(r"P(X|Kelas=1) = P(Kelas=1) \times P(Age) \times P(BMI) \times P(Glucose) \times P(Insulin)")
         st.latex(
-            rf"P(X|H=0) = {d(prior_0)} \times {d(g0_gluc)} \times {d(g0_bmi)} \times {d(g0_age)}"
+            rf"P(X|Kelas=1) = {d(prior_2)} \times {d(g2_age)} \times {d(g2_bmi)} \times {d(g2_gluc)} \times {d(g2_insulin)}"
         )
-        st.latex(rf"= {d_sci(total_0)} = {f'{total_0:.8f}'.replace('.', ',')}")
+        st.latex(rf"= {d_sci(total_2)} = {f'{total_2:.8f}'.replace('.', ',')}")
 
         st.divider()
 
@@ -359,55 +359,55 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         # ══════════════════════════════════════════════════════
         st.markdown("### KELAS H = 1 (SAKIT)")
 
-        # --- Glucose H=1 ---
+        # --- Glucose Kelas=2 ---
         st.markdown("**1) Glucose**")
-        g1_gluc = calculate_and_render_step_by_step(
-            in_glucose, mean_1['Glucose'], var_1['Glucose'],
+        g2_gluc = calculate_and_render_step_by_step(
+            in_glucose, mean_2['Glucose'], var_2['Glucose'],
             "Glucose", 1, d_input(in_glucose)
         )
 
         st.markdown("---")
 
-        # --- BMI H=1 ---
+        # --- BMI Kelas=2 ---
         st.markdown("**2) BMI**")
-        g1_bmi = calculate_and_render_step_by_step(
-            in_bmi, mean_1['BMI'], var_1['BMI'],
+        g2_bmi = calculate_and_render_step_by_step(
+            in_bmi, mean_2['BMI'], var_2['BMI'],
             "BMI", 1, d_input(in_bmi)
         )
 
         st.markdown("---")
 
-        # --- Age H=1 ---
+        # --- Age Kelas=2 ---
         st.markdown("**3) Age**")
-        g1_age = calculate_and_render_step_by_step(
-            in_age, mean_1['Age'], var_1['Age'],
+        g2_age = calculate_and_render_step_by_step(
+            in_age, mean_2['Age'], var_2['Age'],
             "Age", 1, d_input(in_age)
         )
 
         st.markdown("---")
 
-        # ── GABUNG KELAS H=1 ──
+        # ── GABUNG KELAS Kelas=2 ──
         # Backend: kalikan presisi penuh (seperti Excel kalikan sel)
-        total_1 = prior_1 * g1_gluc * g1_bmi * g1_age
+        total_2 = prior_2 * g2_age * g2_bmi * g2_gluc * g2_insulin
 
         st.markdown("**Gabung Kelas H = 1**")
-        st.latex(r"P(X|H=1) = P(H=1) \times P(Glucose) \times P(BMI) \times P(Age)")
+        st.latex(r"P(X|Kelas=2) = P(Kelas=2) \times P(Age) \times P(BMI) \times P(Glucose) \times P(Insulin)")
         st.latex(
-            rf"P(X|H=1) = {d(prior_1)} \times {d(g1_gluc)} \times {d(g1_bmi)} \times {d(g1_age)}"
+            rf"P(X|Kelas=2) = {d(prior_2)} \times {d(g2_age)} \times {d(g2_bmi)} \times {d(g2_gluc)} \times {d(g2_insulin)}"
         )
-        st.latex(rf"= {d_sci(total_1)} = {f'{total_1:.8f}'.replace('.', ',')}")
+        st.latex(rf"= {d_sci(total_2)} = {f'{total_2:.8f}'.replace('.', ',')}")
 
         st.divider()
 
         # ── PERBANDINGAN & KEPUTUSAN ──
         st.markdown("### PERBANDINGAN & KEPUTUSAN")
-        st.latex(rf"P(X|H=0) = {d_sci(total_0)} = {f'{total_0:.8f}'.replace('.', ',')}")
-        st.latex(rf"P(X|H=1) = {d_sci(total_1)} = {f'{total_1:.8f}'.replace('.', ',')}")
+        st.latex(rf"P(X|Kelas=1) = {d_sci(total_2)} = {f'{total_2:.8f}'.replace('.', ',')}")
+        st.latex(rf"P(X|Kelas=2) = {d_sci(total_2)} = {f'{total_2:.8f}'.replace('.', ',')}")
         st.markdown("**KEPUTUSAN:**")
         
-        if total_0 > total_1:
-            st.latex(r"P(H=0) > P(H=1)")
+        if total_2 > total_2:
+            st.latex(r"P(Kelas=1) > P(Kelas=2)")
             st.latex(r"\Rightarrow \textbf{Masuk Kelas H = 0 (SEHAT)}")
         else:
-            st.latex(r"P(H=1) > P(H=0)")
+            st.latex(r"P(Kelas=2) > P(Kelas=1)")
             st.latex(r"\Rightarrow \textbf{Masuk Kelas H = 1 (SAKIT)}")
