@@ -54,13 +54,13 @@ except FileNotFoundError:
 
 # --- PEMBERSIHAN DATA ---
 # Pastikan data diubah ke bentuk angka untuk menghindari error
-for col in ['Glucose', 'BMI', 'Age', 'Classification']:
+for col in ['Age', 'BMI', 'Glucose', 'Insulin', 'Classification']:
     df[col] = pd.to_numeric(df[col], errors='coerce')
 
-df = df[['Glucose', 'BMI', 'Age', 'Classification']].dropna()
+df = df[['Age', 'BMI', 'Glucose', 'Insulin', 'Classification']].dropna()
 
 
-X = df[['Glucose', 'BMI', 'Age']]
+X = df[['Age', 'BMI', 'Glucose', 'Insulin']]
 y = df['Classification']
 
 
@@ -275,14 +275,14 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         # ====================================================
         # HITUNG PARAMETER DARI DATASET (PRESISI PENUH)
         # ====================================================
-        jml_2      = len(df[df['Classification'] == 2])
+        jml_1      = len(df[df['Classification'] == 1])
         jml_2      = len(df[df['Classification'] == 2])
         total_data = len(df)
-        prior_2    = jml_2 / total_data   # presisi penuh
+        prior_1    = jml_1 / total_data   # presisi penuh
         prior_2    = jml_2 / total_data   # presisi penuh
 
-        mean_2 = df[df['Classification'] == 2][fitur].mean()
-        var_2  = df[df['Classification'] == 2][fitur].var()
+        mean_1 = df[df['Classification'] == 1][fitur].mean()
+        var_1  = df[df['Classification'] == 1][fitur].var()
         mean_2 = df[df['Classification'] == 2][fitur].mean()
         var_2  = df[df['Classification'] == 2][fitur].var()
 
