@@ -68,7 +68,7 @@ model = GaussianNB()
 model.fit(X, y)
 
 # --- TAMPILKAN DATASET ---
-st.subheader("📚 Dataset Training (200 Data: 100 Sehat, 100 Sakit)")
+st.subheader("📚 Dataset Training (100 Data: 50 Sehat, 50 Sakit)")
 st.dataframe(df, use_container_width=True)
 
 st.divider()
