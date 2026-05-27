@@ -63,6 +63,11 @@ X = df[['Age', 'BMI', 'Glucose', 'Insulin']]
 y = df['Classification']
 
 
+# =====================================================================
+# INI ADALAH PERHITUNGAN SISTEM (SCIKIT-LEARN) UTAMA
+# Di sinilah AI Naive Bayes dilatih secara otomatis oleh library Python
+# (Bukan manual matematis)
+# =====================================================================
 model = GaussianNB()
 model.fit(X, y)
 
@@ -227,7 +232,11 @@ def calculate_and_render_step_by_step(x_val, mean_val, var_val, fitur_name, kela
 
 if st.button("Analisa Probabilitas Gaussian", type="primary"):
     
-    # Proses data input ke model AI
+    # =====================================================================
+    # INI ADALAH PROSES PREDIKSI OLEH SISTEM AI (SCIKIT-LEARN)
+    # Hasil akhir (1 atau 2) ditentukan 100% oleh fungsi bawaan library ini,
+    # BUKAN dari teks penjabaran Derivasi Matematis di layar.
+    # =====================================================================
     input_data = [[in_age, in_bmi, in_glucose, in_insulin]]
     prediksi = model.predict(input_data)[0]
     probabilitas = model.predict_proba(input_data)[0]
