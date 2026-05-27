@@ -306,56 +306,64 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         st.divider()
 
 
-        st.markdown("### KELAS H = 0 (SEHAT)")
+        st.markdown("### KELAS 1 (SEHAT)")
         
-        # --- Glucose Kelas=1 ---
-        st.markdown("**1) Glucose**")
-        g2_gluc = calculate_and_render_step_by_step(
-            in_glucose, mean_2['Glucose'], var_2['Glucose'],
-            "Glucose", 0, d_input(in_glucose)
+        # --- Age Kelas=1 ---
+        st.markdown("**1) Age**")
+        g1_age = calculate_and_render_step_by_step(
+            in_age, mean_1['Age'], var_1['Age'],
+            "Age", 1, d_input(in_age)
         )
 
         st.markdown("---")
 
         # --- BMI Kelas=1 ---
         st.markdown("**2) BMI**")
-        g2_bmi = calculate_and_render_step_by_step(
-            in_bmi, mean_2['BMI'], var_2['BMI'],
-            "BMI", 0, d_input(in_bmi)
+        g1_bmi = calculate_and_render_step_by_step(
+            in_bmi, mean_1['BMI'], var_1['BMI'],
+            "BMI", 1, d_input(in_bmi)
         )
 
         st.markdown("---")
 
-        # --- Age Kelas=1 ---
-        st.markdown("**3) Age**")
-        g2_age = calculate_and_render_step_by_step(
-            in_age, mean_2['Age'], var_2['Age'],
-            "Age", 0, d_input(in_age)
+        # --- Glucose Kelas=1 ---
+        st.markdown("**3) Glucose**")
+        g1_gluc = calculate_and_render_step_by_step(
+            in_glucose, mean_1['Glucose'], var_1['Glucose'],
+            "Glucose", 1, d_input(in_glucose)
+        )
+
+        st.markdown("---")
+
+        # --- Insulin Kelas=1 ---
+        st.markdown("**4) Insulin**")
+        g1_insulin = calculate_and_render_step_by_step(
+            in_insulin, mean_1['Insulin'], var_1['Insulin'],
+            "Insulin", 1, d_input(in_insulin)
         )
 
         st.markdown("---")
 
         # ── GABUNG KELAS Kelas=1 ──
-        # Backend: kalikan presisi penuh (seperti Excel kalikan sel)
-        total_2 = prior_2 * g2_age * g2_bmi * g2_gluc * g2_insulin
+        total_1 = prior_1 * g1_age * g1_bmi * g1_gluc * g1_insulin
 
-        st.markdown("**Gabung Kelas H = 0**")
-        st.latex(r"P(X|Kelas=1) = P(Kelas=1) \times P(Age) \times P(BMI) \times P(Glucose) \times P(Insulin)")
+        st.markdown("**Gabung Kelas 1**")
+        st.latex(r"P(X|Kelas=1) = P(Kelas=1) 	imes P(Age) 	imes P(BMI) 	imes P(Glucose) 	imes P(Insulin)")
         st.latex(
-            rf"P(X|Kelas=1) = {d(prior_2)} \times {d(g2_age)} \times {d(g2_bmi)} \times {d(g2_gluc)} \times {d(g2_insulin)}"
+            rf"P(X|Kelas=1) = {d(prior_1)} 	imes {d(g1_age)} 	imes {d(g1_bmi)} 	imes {d(g1_gluc)} 	imes {d(g1_insulin)}"
         )
-        st.latex(rf"= {d_sci(total_2)} = {f'{total_2:.8f}'.replace('.', ',')}")
+        st.latex(rf"= {d_sci(total_1)} = {f'{total_1:.8f}'.replace('.', ',')}")
 
         st.divider()
 
 
-        st.markdown("### KELAS H = 1 (SAKIT)")
+        st.markdown("### KELAS 2 (SAKIT)")
 
-        # --- Glucose Kelas=2 ---
-        st.markdown("**1) Glucose**")
-        g2_gluc = calculate_and_render_step_by_step(
-            in_glucose, mean_2['Glucose'], var_2['Glucose'],
-            "Glucose", 1, d_input(in_glucose)
+        # --- Age Kelas=2 ---
+        st.markdown("**1) Age**")
+        g2_age = calculate_and_render_step_by_step(
+            in_age, mean_2['Age'], var_2['Age'],
+            "Age", 2, d_input(in_age)
         )
 
         st.markdown("---")
@@ -364,28 +372,36 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         st.markdown("**2) BMI**")
         g2_bmi = calculate_and_render_step_by_step(
             in_bmi, mean_2['BMI'], var_2['BMI'],
-            "BMI", 1, d_input(in_bmi)
+            "BMI", 2, d_input(in_bmi)
         )
 
         st.markdown("---")
 
-        # --- Age Kelas=2 ---
-        st.markdown("**3) Age**")
-        g2_age = calculate_and_render_step_by_step(
-            in_age, mean_2['Age'], var_2['Age'],
-            "Age", 1, d_input(in_age)
+        # --- Glucose Kelas=2 ---
+        st.markdown("**3) Glucose**")
+        g2_gluc = calculate_and_render_step_by_step(
+            in_glucose, mean_2['Glucose'], var_2['Glucose'],
+            "Glucose", 2, d_input(in_glucose)
+        )
+
+        st.markdown("---")
+
+        # --- Insulin Kelas=2 ---
+        st.markdown("**4) Insulin**")
+        g2_insulin = calculate_and_render_step_by_step(
+            in_insulin, mean_2['Insulin'], var_2['Insulin'],
+            "Insulin", 2, d_input(in_insulin)
         )
 
         st.markdown("---")
 
         # ── GABUNG KELAS Kelas=2 ──
-        # Backend: kalikan presisi penuh (seperti Excel kalikan sel)
         total_2 = prior_2 * g2_age * g2_bmi * g2_gluc * g2_insulin
 
-        st.markdown("**Gabung Kelas H = 1**")
-        st.latex(r"P(X|Kelas=2) = P(Kelas=2) \times P(Age) \times P(BMI) \times P(Glucose) \times P(Insulin)")
+        st.markdown("**Gabung Kelas 2**")
+        st.latex(r"P(X|Kelas=2) = P(Kelas=2) 	imes P(Age) 	imes P(BMI) 	imes P(Glucose) 	imes P(Insulin)")
         st.latex(
-            rf"P(X|Kelas=2) = {d(prior_2)} \times {d(g2_age)} \times {d(g2_bmi)} \times {d(g2_gluc)} \times {d(g2_insulin)}"
+            rf"P(X|Kelas=2) = {d(prior_2)} 	imes {d(g2_age)} 	imes {d(g2_bmi)} 	imes {d(g2_gluc)} 	imes {d(g2_insulin)}"
         )
         st.latex(rf"= {d_sci(total_2)} = {f'{total_2:.8f}'.replace('.', ',')}")
 
@@ -393,13 +409,13 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
 
 
         st.markdown("### PERBANDINGAN & KEPUTUSAN")
-        st.latex(rf"P(X|Kelas=1) = {d_sci(total_2)} = {f'{total_2:.8f}'.replace('.', ',')}")
+        st.latex(rf"P(X|Kelas=1) = {d_sci(total_1)} = {f'{total_1:.8f}'.replace('.', ',')}")
         st.latex(rf"P(X|Kelas=2) = {d_sci(total_2)} = {f'{total_2:.8f}'.replace('.', ',')}")
         st.markdown("**KEPUTUSAN:**")
         
-        if total_2 > total_2:
+        if total_1 > total_2:
             st.latex(r"P(Kelas=1) > P(Kelas=2)")
-            st.latex(r"\Rightarrow \textbf{Masuk Kelas H = 0 (SEHAT)}")
+            st.latex(r"\Rightarrow 	extbf{Masuk Kelas 1 (SEHAT)}")
         else:
             st.latex(r"P(Kelas=2) > P(Kelas=1)")
-            st.latex(r"\Rightarrow \textbf{Masuk Kelas H = 1 (SAKIT)}")
+            st.latex(r"\Rightarrow 	extbf{Masuk Kelas 2 (SAKIT)}")
