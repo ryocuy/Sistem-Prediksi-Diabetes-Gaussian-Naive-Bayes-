@@ -126,8 +126,15 @@ def d_sci(val):
     return rf"{d(mantissa)} \times 10^{{{exp}}}"
 
 def d_auto(val):
-    """Format presisi desimal dinamis tanpa memotong angka nol belakang."""
-    s = f"{val:.25f}".rstrip('0')
+    """Format presisi desimal dinamis (maksimal 4 angka penting) tanpa nol belakang panjang."""
+    if val == 0:
+        return "0"
+    exp = math.floor(math.log10(abs(val)))
+    if exp >= 0:
+        s = f"{val:.4f}".rstrip('0')
+    else:
+        prec = abs(exp) + 4
+        s = f"{val:.{prec}f}".rstrip('0')
     if s.endswith('.'): s += '0'
     return s.replace('.', ',')
 
