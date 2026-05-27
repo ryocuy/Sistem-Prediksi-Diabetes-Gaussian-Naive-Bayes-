@@ -123,7 +123,7 @@ def d_sci(val):
 
     exp = math.floor(math.log10(abs(val)))
     mantissa = val / (10 ** exp)
-    return rf"{d(mantissa)} \\times 10^{{{exp}}}"
+    return rf"{d(mantissa)} \times 10^{{{exp}}}"
 
 
 def calculate_and_render_step_by_step(x_val, mean_val, var_val, fitur_name, kelas, x_display):
@@ -174,39 +174,39 @@ def calculate_and_render_step_by_step(x_val, mean_val, var_val, fitur_name, kela
     
   
     st.latex(
-        rf"= \frac{{1}}{{\sqrt{{2 \\times 3,14 \\times {d(var_val)}}}}}"
-        rf" \\times 2,72^{{-\frac{{({x_display}-{d(mean_val)})^2}}{{2 \\times {d(var_val)}}}}}"
+        rf"= \frac{{1}}{{\sqrt{{2 \times 3,14 \times {d(var_val)}}}}}"
+        rf" \times 2,72^{{-\frac{{({x_display}-{d(mean_val)})^2}}{{2 \times {d(var_val)}}}}}"
     )
     
 
     st.latex(
         rf"= \frac{{1}}{{\sqrt{{{d(akar_bawah)}}}}}"
-        rf" \\times 2,72^{{-\frac{{{d(pangkat_atas)}}}{{{d(pangkat_bawah)}}}}}"
+        rf" \times 2,72^{{-\frac{{{d(pangkat_atas)}}}{{{d(pangkat_bawah)}}}}}"
     )
     
 
     st.latex(
         rf"= \frac{{1}}{{\sqrt{{{d(akar_bawah)}}}}}"
-        rf" \\times 2,72^{{{d(neg_eksponen)}}}"
+        rf" \times 2,72^{{{d(neg_eksponen)}}}"
     )
 
 
     st.latex(
         rf"= \frac{{1}}{{\sqrt{{{d(akar_bawah)}}}}}"
-        rf" \\times {d(kanan)}"
+        rf" \times {d(kanan)}"
     )
     
 
     st.latex(
         rf"= \frac{{1}}{{{d(hasil_akar)}}}"
-        rf" \\times {d(kanan)}"
+        rf" \times {d(kanan)}"
     )
 
 
     nota = ""
     if abs(hasil_akhir) < 0.005 and hasil_akhir != 0:
         nota = r" \text{ *(Boleh lebih dari 2 digit karena 0,00...)*}"
-    st.latex(rf"= {d(kiri)} \\times {d(kanan)} = {d(hasil_akhir)}{nota}")
+    st.latex(rf"= {d(kiri)} \times {d(kanan)} = {d(hasil_akhir)}{nota}")
     
     return hasil_akhir  
 
@@ -348,9 +348,9 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         total_1 = prior_1 * g1_age * g1_bmi * g1_gluc * g1_insulin
 
         st.markdown("**Gabung Kelas 1**")
-        st.latex(r"P(X|Kelas=1) = P(Kelas=1) \\times P(Age) \\times P(BMI) \\times P(Glucose) \\times P(Insulin)")
+        st.latex(r"P(X|Kelas=1) = P(Kelas=1) \times P(Age) \times P(BMI) \times P(Glucose) \times P(Insulin)")
         st.latex(
-            rf"P(X|Kelas=1) = {d(prior_1)} \\times {d(g1_age)} \\times {d(g1_bmi)} \\times {d(g1_gluc)} \\times {d(g1_insulin)}"
+            rf"P(X|Kelas=1) = {d(prior_1)} \times {d(g1_age)} \times {d(g1_bmi)} \times {d(g1_gluc)} \times {d(g1_insulin)}"
         )
         st.latex(rf"= {d_sci(total_1)} = {f'{total_1:.8f}'.replace('.', ',')}")
 
@@ -399,9 +399,9 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
         total_2 = prior_2 * g2_age * g2_bmi * g2_gluc * g2_insulin
 
         st.markdown("**Gabung Kelas 2**")
-        st.latex(r"P(X|Kelas=2) = P(Kelas=2) \\times P(Age) \\times P(BMI) \\times P(Glucose) \\times P(Insulin)")
+        st.latex(r"P(X|Kelas=2) = P(Kelas=2) \times P(Age) \times P(BMI) \times P(Glucose) \times P(Insulin)")
         st.latex(
-            rf"P(X|Kelas=2) = {d(prior_2)} \\times {d(g2_age)} \\times {d(g2_bmi)} \\times {d(g2_gluc)} \\times {d(g2_insulin)}"
+            rf"P(X|Kelas=2) = {d(prior_2)} \times {d(g2_age)} \times {d(g2_bmi)} \times {d(g2_gluc)} \times {d(g2_insulin)}"
         )
         st.latex(rf"= {d_sci(total_2)} = {f'{total_2:.8f}'.replace('.', ',')}")
 
