@@ -75,13 +75,15 @@ st.divider()
 
 
 st.subheader("Masukkan Data Uji Pasien:")
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 with col1:
-    in_glucose = st.number_input("Kadar Glukosa (Glucose)", min_value=0.0, value=120.0, step=1.0)
+    in_age = st.number_input("Umur (Age)", min_value=1.0, value=30.0, step=1.0)
 with col2:
     in_bmi = st.number_input("Indeks Massa Tubuh (BMI)", min_value=0.0, value=25.0, step=0.1)
 with col3:
-    in_age = st.number_input("Umur (Age)", min_value=1.0, value=30.0, step=1.0)
+    in_glucose = st.number_input("Kadar Glukosa (Glucose)", min_value=0.0, value=120.0, step=1.0)
+with col4:
+    in_insulin = st.number_input("Insulin", min_value=0.0, value=5.0, step=0.1)
 
 
 PI = 3.14
