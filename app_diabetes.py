@@ -250,8 +250,8 @@ if st.button("Analisa Probabilitas Gaussian", type="primary"):
     inputs = [in_age, in_bmi, in_glucose, in_insulin]
 
     for i, col in enumerate(fitur):
-        mu_0 = df[df['Classification']==2][col].mean()
-        std_0 = df[df['Classification']==2][col].std()
+        mu_0 = df[df['Classification']==1][col].mean()
+        std_0 = df[df['Classification']==1][col].std()
         
         mu_1 = df[df['Classification']==2][col].mean()
         std_1 = df[df['Classification']==2][col].std()
